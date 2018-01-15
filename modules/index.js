@@ -1,4 +1,4 @@
-window.API_BASE_PATH = "http://localhost:8080/";
+window.API_BASE_PATH = "http://localhost:8089/";
 layui.config({
     dir: 'plugins/layui/'
     , version: false

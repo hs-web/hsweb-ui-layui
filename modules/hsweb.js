@@ -30,6 +30,7 @@ layui.define(["jquery","element","request"],function (exports) {
                     ,dataName: 'result.data' //数据列表的字段名称，默认：data
                 }
             });
+            return table;
         });
     }
     var e ={
