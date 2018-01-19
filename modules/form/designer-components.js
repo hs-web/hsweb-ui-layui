@@ -1,12 +1,5 @@
 (function () {
-    var Designer = window.Designer ? window.Designer : {};
-    Designer.components = {};
-    var componentsBuilder = {};
-    Designer.createComponent = function (type, id) {
-        if (componentsBuilder[type]) {
-            return Designer.components[id] = componentsBuilder[type](id);
-        }
-    };
+    var Designer = window.Designer;
 
     function createDefaultEditor() {
         return [
@@ -24,7 +17,7 @@
                 id: "size",
                 editor: "radio",
                 text: "控件大小",
-                value: "large",
+                value: "6",
                 data: [
                     {text: "大", value: 'large'},
                     {text: "小", value: 'small'}
@@ -43,11 +36,12 @@
         ];
     }
 
-    var Component = function (type, config) {
-        this.config = config;
+    var Component = function () {
+        this.config = {};
         this.events = {};
         this.properties = {};
         this.editors = [];
+
     };
     Component.prototype.on = function (event, listener) {
         if (!this.events[event]) {
@@ -119,6 +113,7 @@
             Super.prototype = Component.prototype;
             //将实例作为子类的原型
             O.prototype = new Super();
+            O.type="基础控件";
         })();
     }
 
@@ -127,26 +122,29 @@
         function TextBox(id) {
             Component.call(this);
             this.id = id;
+            this.editors = createDefaultEditor();
+            this.properties["comment"] = {id: "comment", value: "输入框"};
         }
 
         createClass(TextBox);
 
         TextBox.prototype.render = function () {
             var container = this.getContainer(function () {
-                var c = $("<div class=\"hs-textbox layui-form-item brick large\">");
+                var m = $("<div class='layui-col-xs6'>");
+                var c = $("<div class=\"layui-form-item brick\">");
                 var label = $("<label  class=\"layui-form-label\">");
                 var inputContainer = $("<div class=\"layui-input-block\">");
                 var input = $("<input type=\"text\"  class=\"layui-input\">");
-                label.text("新建输入框");
+                label.text("输入框");
                 c.append(label).append(inputContainer.append(input));
-                return c;
+                m.append(c);
+                return m;
             });
             this.un("propertiesChanged")
                 .on('propertiesChanged', function (e) {
                     if (e.id === 'size') {
-                        container.removeClass("small");
-                        container.removeClass("large");
-                        container.addClass(e.value);
+                        container.removeClass();
+                        container.addClass("layui-col-xs" + e.value);
                     }
                     if (e.id === 'comment') {
                         container.find("label").text(e.value);
@@ -156,37 +154,37 @@
                 });
             return container;
         };
-        componentsBuilder.textbox = function (id) {
-            var box = new TextBox(id);
-            box.editors = createDefaultEditor();
-            return box;
-        }
+
+        Designer.registerComponent("textbox", TextBox);
     }
     /**文本域**/
     {
         function TextArea(id) {
             Component.call(this);
             this.id = id;
+            this.editors = createDefaultEditor();
+            this.properties["comment"] = {id: "comment", value: "多行文本"};
         }
 
         createClass(TextArea);
-
         TextArea.prototype.render = function () {
+
             var container = this.getContainer(function () {
-                var c = $("<div class=\"hs-textbox layui-form-text layui-form-item brick large\">");
+                var m = $("<div class='layui-col-xs12'>");
+                var c = $("<div class=\"layui-form-text layui-form-item brick\">");
                 var label = $("<label  class=\"layui-form-label\">");
                 var inputContainer = $("<div class=\"layui-input-block\">");
                 var input = $("<textarea  class=\"layui-textarea\"></textarea>");
-                // label.text("新建多行文本");
+                label.text("多行文本");
                 c.append(label).append(inputContainer.append(input));
-                return c;
+                m.append(c);
+                return m;
             });
             this.un("propertiesChanged")
                 .on('propertiesChanged', function (e) {
                     if (e.id === 'size') {
-                        container.removeClass("small");
-                        container.removeClass("large");
-                        container.addClass(e.value);
+                        container.removeClass();
+                        container.addClass("layui-col-xs" + e.value);
                     }
                     if (e.id === 'comment') {
                         container.find("label").text(e.value);
@@ -196,11 +194,7 @@
                 });
             return container;
         };
-        componentsBuilder.textarea = function (id) {
-            var box = new TextArea(id);
-            box.editors = createDefaultEditor();
-            return box;
-        }
+        Designer.registerComponent("textarea", TextArea);
     }
 
     /**多选**/
@@ -208,26 +202,33 @@
         function CheckBox(id) {
             Component.call(this);
             this.id = id;
+            this.editors = createDefaultEditor();
+            this.editors.push({
+                id: "data",
+                text: "选项",
+                value: "选项1,选项2"
+            });
         }
 
         createClass(CheckBox);
 
         CheckBox.prototype.render = function () {
             var container = this.getContainer(function () {
-                var c = $("<div class=\"hs-textbox layui-form-item brick large\">");
+                var m = $("<div class='layui-col-xs4'>");
+                var c = $("<div class=\"layui-form-item brick\">");
                 var label = $("<label  class=\"layui-form-label\">");
                 var inputContainer = $("<div class=\"layui-input-block\">");
                 var checkbox1 = $("<input type=\"checkbox\" name='checkbox[1]' title='选项1'>");
                 var checkbox2 = $("<input type=\"checkbox\" name='checkbox[2]' title='选项2'>");
                 label.text("新建多选");
                 c.append(label).append(inputContainer.append(checkbox1).append(checkbox2));
-                return c;
+                return m.append(c);
             });
             var me = this;
             this.un("propertiesChanged")
                 .on('propertiesChanged', function (e) {
                     function initData(data) {
-                        var inputParent = container.find("input").parent();
+                        var inputParent = container.find(".layui-input-block");
                         inputParent.children().remove();
                         if (!data) {
                             return;
@@ -255,9 +256,8 @@
                     }
 
                     if (e.id === 'size') {
-                        container.removeClass("small");
-                        container.removeClass("large");
-                        container.addClass(e.value);
+                        container.removeClass();
+                        container.addClass("layui-col-xs" + e.value);
                     }
                     else if (e.id === 'comment') {
                         container.find("label").text(e.value);
@@ -273,16 +273,8 @@
                 });
             return container;
         };
-        componentsBuilder.checkbox = function (id) {
-            var box = new CheckBox(id);
-            box.editors = createDefaultEditor();
-            box.editors.push({
-                id: "data",
-                text: "选项",
-                value: "选项1,选项2"
-            });
-            return box;
-        }
+
+        Designer.registerComponent("checkbox", CheckBox);
     }
 
     /**单选**/
@@ -290,26 +282,33 @@
         function RadioBox(id) {
             Component.call(this);
             this.id = id;
+            this.editors = createDefaultEditor();
+            this.editors.push({
+                id: "data",
+                text: "选项",
+                value: "选项1,选项2"
+            });
         }
 
         createClass(RadioBox);
 
         RadioBox.prototype.render = function () {
             var container = this.getContainer(function () {
-                var c = $("<div class=\"hs-textbox layui-form-item brick large\">");
+                var m = $("<div class='layui-col-xs4 layui-col-md4'>");
+                var c = $("<div class=\"layui-form-item brick\">");
                 var label = $("<label  class=\"layui-form-label\">");
                 var inputContainer = $("<div class=\"layui-input-block\">");
                 var checkbox1 = $("<input type=\"radio\" name='radio[1]' title='选项1'>");
                 var checkbox2 = $("<input type=\"radio\" name='radio[2]' title='选项2'>");
                 label.text("新建单选");
                 c.append(label).append(inputContainer.append(checkbox1).append(checkbox2));
-                return c;
+                return m.append(c);
             });
             var me = this;
             this.un("propertiesChanged")
                 .on('propertiesChanged', function (e) {
                     function initData(data) {
-                        var inputParent = container.find("input").parent();
+                        var inputParent = container.find(".layui-input-block");
                         inputParent.children().remove();
                         if (!data) {
                             return;
@@ -338,9 +337,8 @@
                     }
 
                     if (e.id === 'size') {
-                        container.removeClass("small");
-                        container.removeClass("large");
-                        container.addClass(e.value);
+                        container.removeClass();
+                        container.addClass("layui-col-xs" + e.value);
                     }
                     else if (e.id === 'comment') {
                         container.find("label").text(e.value);
@@ -356,15 +354,6 @@
                 });
             return container;
         };
-        componentsBuilder.radio = function (id) {
-            var box = new RadioBox(id);
-            box.editors = createDefaultEditor();
-            box.editors.push({
-                id: "data",
-                text: "选项",
-                value: "选项1,选项2"
-            });
-            return box;
-        }
+        Designer.registerComponent("radio", RadioBox);
     }
 })();

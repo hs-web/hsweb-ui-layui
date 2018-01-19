@@ -5,140 +5,43 @@
     <meta http-equiv=Content-Type content="text/html;charset=utf-8">
     <title>表单设计器</title>
     <link rel="stylesheet" href="../../plugins/layui/css/layui.css">
-    <link rel="stylesheet" href="../../plugins/jquery-gridly/stylesheets/jquery.gridly.css">
-    <style type="text/css">
-        .layui-container {
-            width: 100%;
-        }
-
-        .gridly {
-            opacity: 1;
-            position: relative;
-            width: 1000px;
-            margin: auto;
-            border: 1px gray;
-        }
-
-        .brick.dragging {
-            opacity: 0.8;
-        }
-
-        .brick.mini {
-            width: 30%;
-            border: 1px red;
-            /*background-color: green;*/
-        }
-
-        .brick.small {
-            width: 46%;
-            border: 1px red;
-            /*background-color: green;*/
-        }
-
-        .brick.large {
-            width: 94%;
-            /*background-color: black;*/
-        }
-
-        .brick *:active {
-            cursor: move;
-        }
-
-        .brick .layui-form-label:hover {
-            border: 1px solid red;
-        }
-    </style>
+    <link rel="stylesheet" href="designer.css">
 </head>
 <body class="layui-layout-body">
-<div class="layui-layout layui-layout-admin">
+<div class="layui-layout">
     <div class="layui-header">
-        <div class="layui-logo">hsweb表单设计器</div>
+        <button class="layui-btn export-html">导出HTML</button>
+        <!--<button class="layui-btn">导入HTML</button>-->
+        <button class="layui-btn fix-layout">修复布局</button>
+
+        <a target="_blank" href="https://github.com/hs-web" class="layui-btn layui-btn-normal">关注hsweb</a>
     </div>
-    <div class="layui-side layui-bg-black">
-        <div class="layui-side-scroll">
-            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
-            <ul id="left-menu" class="layui-nav layui-nav-tree" lay-filter="left-menu">
-                <li class="layui-nav-item layui-nav-itemed">
-                    <a href="javascript:;">常用控件</a>
-                    <dl class="layui-nav-child">
-                        <dd><a onclick="addComponent('title')" href="javascript:void(0);">标题</a></dd>
-                        <dd><a onclick="addComponent('textbox')" href="javascript:;">单行文本</a></dd>
-                        <dd><a onclick="addComponent('textarea')" href="javascript:;">多行文本</a></dd>
-                        <dd><a onclick="addComponent('radio')" href="javascript:;">单项选择</a></dd>
-                        <dd><a onclick="addComponent('checkbox')" href="javascript:;">多项选择</a></dd>
-                    </dl>
-                </li>
-            </ul>
+    <div class="layui-container">
+        <div class="layui-col-xs2">
+            <div class="layui-form layui-form-pane">
+                <div class="layui-collapse support-components"></div>
+            </div>
         </div>
-    </div>
-    <div class="layui-body">
-        <br>
-        <div class="gridly layui-form layui-form-pane">
-            <!--<div class="layui-form-item brick small" style="height: 30px">-->
-                <!--<label class="layui-form-label ">姓名</label>-->
-                <!--<div class="layui-input-block">-->
-                    <!--<input type="text" name="identity" placeholder="" autocomplete="off" class="layui-input">-->
-                <!--</div>-->
-            <!--</div>-->
-            <!--<div class="layui-form-item brick small" style="height: 30px">-->
-                <!--<label class="layui-form-label">姓名2</label>-->
-                <!--<div class="layui-input-block">-->
-                    <!--<input type="text" name="identity" placeholder="" autocomplete="off" class="layui-input">-->
-                <!--</div>-->
-            <!--</div>-->
-            <!--<div class="layui-form-item brick small" style="height: 30px">-->
-                <!--<label class="layui-form-label">年龄1</label>-->
-                <!--<div class="layui-input-block">-->
-                    <!--<input type="text" name="identity" placeholder="" autocomplete="off" class="layui-input">-->
-                <!--</div>-->
-            <!--</div>-->
-            <!--<div class="layui-form-item brick large" style="height: 30px">-->
-                <!--<label class="layui-form-label">性别</label>-->
-                <!--<div class="layui-input-block">-->
-                    <!--<input type="text" name="identity" lay-verify="identity" placeholder="" autocomplete="off" class="layui-input">-->
-                <!--</div>-->
-            <!--</div>-->
-            <!--<div class="layui-form-item brick small" style="height: 30px">-->
-                <!--<label class="layui-form-label">爱好</label>-->
-                <!--<div class="layui-input-block">-->
-                    <!--<input type="checkbox" name="like[write]" title="写作">-->
-                    <!--<input type="checkbox" name="like[read]" title="阅读">-->
-                    <!--<input type="checkbox" name="like[game]" title="游戏">-->
-                <!--</div>-->
-            <!--</div>-->
-            <!--<div class="layui-form-item brick small" style="height: 30px">-->
-                <!--<label class="layui-form-label">性别</label>-->
-                <!--<div class="layui-input-block">-->
-                    <!--<input type="radio" name="sex" value="男" title="男">-->
-                    <!--<input type="radio" name="sex" value="女" title="女" checked>-->
-                <!--</div>-->
-            <!--</div>-->
-            <!--<div class="layui-form-item layui-form-text brick large">-->
-                <!--<label class="layui-form-label">文本域</label>-->
-                <!--<div class="layui-input-block">-->
-                    <!--<textarea placeholder="请输入内容" class="layui-textarea"></textarea>-->
-                <!--</div>-->
-            <!--</div>-->
-            <!--<div class="brick large">-->
-                <!--<fieldset class="layui-elem-field">-->
-                    <!--<legend>字段集区块 - 默认风格</legend>-->
-                    <!--<div class="layui-field-box">-->
-                        <!--内容区域-->
-                    <!--</div>-->
-                <!--</fieldset>-->
-            <!--</div>-->
+        <div class="layui-col-xs8">
+            <div class="main-panel layui-container layui-form layui-form-pane" style="width: 100%">
+                <div class="layui-row components" style="width: 100%;min-height: 600px;"></div>
+            </div>
+        </div>
+        <div class="layui-col-xs2">
+            <div class="layui-form layui-form-pane" id="component-properties" style="width: 100%;text-align: center"></div>
         </div>
     </div>
 </div>
+
+
 </body>
 </html>
 <script src="../../plugins/layui/layui.all.js"></script>
-<script src="../../plugins/jquery-gridly/javascripts/jquery.js"></script>
-<script src="../../plugins/jquery-gridly/javascripts/jquery.gridly.js"></script>
+<script src="../../plugins/jquery-ui/jquery.js"></script>
+<script src="../../plugins/jquery-ui/jquery-ui.js"></script>
 <script src="designer.js"></script>
 <script src="designer-components.js"></script>
 <script src="md5.js"></script>
-
 
 <script type="text/javascript">
 
