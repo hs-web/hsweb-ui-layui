@@ -4,6 +4,7 @@ layui.define(["jquery","element","request"],function (exports) {
     var $ = layui.jquery;
     var request = layui.request;
     function createTable(id,elem,url,cols) {
+        console.log($(elem));
         layui.use("table",function () {
             var table = layui.table;
             var sorts=[];
@@ -13,7 +14,7 @@ layui.define(["jquery","element","request"],function (exports) {
                 url: window.API_BASE_PATH+url,
                 cols:cols,
                 ajaxSort:true,
-                height:'full-200',
+                height:'full-210',
                 //where: {token: 'sasasas', id: 123} //如果无需传递额外参数，可不加该参数
                 //method: 'post' //如果无需自定义HTTP类型，可不加该参数
                 request: {

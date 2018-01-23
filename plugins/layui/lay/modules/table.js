@@ -837,6 +837,9 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
 
         //tbody区域高度
         bodyHeight = parseFloat(height) - parseFloat(that.layHeader.height()) - 1;
+        if(that.layHeader.height() <0 ) {
+            bodyHeight = parseFloat(height) - 39;
+        }
         if (options.toolbar) {
             bodyHeight = bodyHeight - that.layTool.outerHeight();
         }

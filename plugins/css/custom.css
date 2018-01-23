@@ -1,0 +1,8 @@
+.layui-body {
+    overflow-y: scroll;
+    padding: 10px;
+}
+
+.layui-tab {
+    margin: 0;
+}
