@@ -1,4 +1,4 @@
-window.API_BASE_PATH = "http://localhost:8089/";
+window.API_BASE_PATH = "http://localhost:8080/";
 layui.config({
     dir: 'plugins/layui/'
     , version: false
@@ -56,7 +56,7 @@ layui.use(['hsweb', "element"], function (r) {
         if ($("[lay-id=" + menu.id + "]").length === 0) {
             layui.element.tabAdd('tabs', {
                 title: menu.name
-                , content:'<div id="container-'+menu.id+'" style="width: 100%;height: 100%" />'
+                , content:'<div id="container-'+menu.id+'"></div>'
                 , id: menu.id
             });
             layui.use("user",function () {
