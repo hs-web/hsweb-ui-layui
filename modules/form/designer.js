@@ -1,23 +1,203 @@
+var Component = function () {
+    this.config = {};
+    this.events = {};
+    this.properties = [];
+};
+Component.prototype.on = function (event, listener) {
+    if (!this.events[event]) {
+        this.events[event] = [];
+    }
+    this.events[event].push(listener);
+    return this;
+};
+Component.prototype.un = function (event) {
+    this.events[event] = [];
+    return this;
+};
+Component.prototype.getProperties = function () {
+    return this.properties;
+};
+Component.prototype.getProperty = function (name) {
+    var props = this.properties;
+    //   console.log(props);
+    for (var i = 0; i < props.length; i++) {
+        // console.log(props[i].id,name);
+        if (props[i].id === name) {
+            return props[i];
+        }
+    }
+    return null;
+};
+Component.prototype.removeProperty = function (name) {
+    var indexOf = this.properties.indexOf(this.getProperty(name));
+    if (indexOf !== -1) {
+        this.properties.splice(indexOf, 1);
+    }
+};
+Component.prototype.setProperty = function (property, value) {
+    //console.log(property, value, this.getProperties());
+    var prop = this.getProperty(property);
+    // if (prop.value === value) {
+    //     return;
+    // }
+    prop.value = value;
+    if (property === 'size' || property === 'mdSize') {
+        this.resize();
+    }
+    if (this.events["propertiesChanged"]) {
+        $(this.events["propertiesChanged"]).each(function () {
+            var event = this;
+            event(property, value);
+        });
+    }
+    return this;
+};
+Component.prototype.setProperties = function (properties) {
+    var me = this;
+    for (var i in properties) {
+        me.setProperty(i, properties[i]);
+    }
+    return this;
+};
+Component.prototype.render = function () {
+
+};
+Component.prototype.bind = function (el) {
+    $(el).children().remove();
+
+    $(el).replaceWith(this.render());
+};
+Component.prototype.getContainer = function (newFunc) {
+    var container;
+    if (!this.container) {
+        if (this.id) {
+            container = $("[hs-id='" + this.id + "']");
+            if (container.length === 0) {
+                this.container = container = newFunc();
+                this.container.attr("hs-id", this.id);
+            }
+        }
+    } else {
+        return this.container;
+    }
+    return container;
+};
+Component.prototype.resize = function () {
+    var size = this.getProperty("size");
+    var mdSize = this.getProperty("mdSize");
+    if (size) {
+        size = size.value;
+    }
+    if (mdSize) {
+        mdSize = mdSize.value;
+    }
+    if (this.container) {
+        this.container.removeClass();
+        this.container.addClass("layui-col-md" + (size ? size : 6));
+        this.container.addClass("layui-col-xs" + (mdSize ? mdSize : 12));
+    }
+};
+Component.prototype.init = function () {
+};
+Component.prototype.remove = function () {
+    this.getContainer(function () {
+        return $();
+    }).remove();
+};
+
 (function () {
     var supportComponents = {};
     window.Designer = function (config) {
         this.config = config;
         this.components = {};
+        this.events = {};
     };
     window.Designer.supportComponents = supportComponents;
+
     Designer.registerComponent = function (type, component) {
         supportComponents[type] = component;
     };
 
     Designer.prototype.createComponent = function (type, id) {
         if (supportComponents[type]) {
-            return this.components[id] = new supportComponents[type](id);
+            var component = this.components[id] = new supportComponents[type](id);
+            component.type = type;
+            return component;
         }
         return undefined;
     };
-
+    Designer.prototype.on = function (event, callback) {
+        if (!this.events[event]) {
+            this.events[event] = [];
+        }
+        this.events[event].push(callback);
+    };
+    Designer.prototype.un = function (event) {
+        this.events[event] = [];
+    };
+    Designer.prototype.doEvent = function (event, param) {
+        $(this.events[event]).each(function () {
+            this.call(param);
+        });
+    };
+    Designer.prototype.getConfig = function () {
+        var config = {};
+        config.html = this.getHtml();
+        config.components = this.components;
+        return config;
+    };
+    Designer.prototype.getHtml = function () {
+        var html = $(".main-panel");
+        html.find(".component-info").parent().css("border", "");
+        html.find(".layui-form-label,legend").css("border", "");
+        return html[0].outerHTML;
+    };
     Designer.prototype.init = function () {
+        var parser = new FormParser();
+        parser.config.elem = ".main-panel";
         var me = this;
+
+        function initEvent(component) {
+            var html = component.render();
+            // $('.main-panel').append(html);
+            // $('.gridly').gridly();
+            function focus() {
+                initPropertiesEditor(component);
+                $(".brick").find(".layui-form-label,legend,.component-info").css("border", "");
+                $(".component-info").parent().parent().css("border", "");
+                html.find(".layui-form-label,legend").css("border", "1px solid red");
+                html.find(".component-info").parent().parent().css("border", "1px solid red");
+
+                reloadLayui();
+                me.nowEditComponent = component;
+            }
+
+            html.find('.layui-form-label,legend,.component-info').on('click', focus);
+            html.find('input,textarea,select').on("click", focus);
+            return component;
+        }
+
+        me.loadConfig = function (config) {
+            var html = $(config.html);
+            var components = config.components;
+            for (var id in components) {
+                var component = components[id];
+                var type = component.type;
+                var realComponent = this.createComponent(type, id);
+                realComponent.container = html.find("[hs-id=" + id + "]");
+                realComponent.properties = component.properties;
+                realComponent.config = component.config;
+                initEvent(realComponent);
+            }
+            $(".main-panel").replaceWith(html);
+            initDroppable();
+        };
+
+        function reloadLayui() {
+            layui.element.render();
+            layui.form.render();
+        }
+
         /**初始化组件列表**/
         {
             var group = {};
@@ -31,34 +211,41 @@
             }
             var container = $(".support-components");
             var index = 0;
+
+            function init(component) {
+                var componentHtml = new component(md5(Math.random())).render();
+                componentHtml.find(".brick").removeClass("brick");
+                componentHtml.find(".layui-form-item").addClass("layui-form-text");
+
+                componentHtml.find("textarea,iframe").replaceWith($("<input class='layui-input'>"));
+                componentHtml
+                    .find("input,textarea,select")
+                    .attr("readonly", "readonly")
+                    .attr("disabled", "disabled");
+
+                componentHtml.find(".components").remove();
+                componentHtml.attr("class", "");
+                componentHtml.addClass("component");
+                componentHtml.attr("hs-type", component.componentName);
+                html.push(componentHtml[0].outerHTML)
+            }
+
             for (var type in group) {
                 index++;
                 var list = group[type];
                 var html = [];
-                html.push('<div class="layui-colla-item">');
+                html.push('<div style="overflow: auto" class="layui-colla-item">');
                 html.push('<h2 class="layui-colla-title">' + type + '</h2>');
                 html.push('<div class="layui-colla-content ' + (index === 1 ? 'layui-show' : '') + '">');
                 $(list).each(function () {
-                    var component = this;
-                    var componentHtml = new component("__").render();
-                    componentHtml.find(".brick").removeClass("brick");
-                    componentHtml.find(".layui-form-item").addClass("layui-form-text");
-                    componentHtml
-                        .find("input,textarea")
-                        .attr("readonly", "readonly")
-                        .attr("disabled", "disabled");
-
-                    componentHtml.attr("class", "");
-                    componentHtml.addClass("component");
-                    componentHtml.attr("hs-type", this.componentName);
-                    html.push(componentHtml[0].outerHTML)
+                    init(this);
                 });
                 html.push('</div>');
                 html.push('</div>');
                 container.append(html.join(""));
             }
-            layui.element.render();
-            layui.form.render();
+            reloadLayui();
+
         }
         /**初始化主编辑器**/
         {
@@ -68,31 +255,39 @@
                 cursor: "move",
                 revert: "valid"
             }).disableSelection();
-
+            var cache = {};
             function initDroppable() {
-                var cache = {};
-                $(".components").sortable({
-                    revert: true,
-                    connectWith: ".component"
-                }).droppable({
-                    accept: ".component",
-                    drop: function (event, ui) {
-                        var source = $(ui.draggable);
-                        var type = source.attr("hs-type");
-                        if (!cache[event.timeStamp]) {
-                            if (type) {
-                                var component = newComponent(type);
-                                var html = component.getContainer();
-                                source.replaceWith(html);
-                                html.click();
-                                initPropertiesEditor(component);
-                            }
-                            cache[event.timeStamp] = 1;
-                            // initDroppable();
-                        }
 
-                    }
-                }).disableSelection();
+                $(".components")
+                    .sortable({
+                        revert: true,
+                        update: function () {
+                            designer.doEvent("configChanged", me);
+                        },
+                        connectWith: ".component"
+                    })
+                    .droppable({
+                        greedy: true,
+                        accept: ".component",
+                        drop: function (event, ui) {
+                            var source = $(ui.draggable);
+                            var type = source.attr("hs-type");
+                            if (!cache[event.timeStamp]) {
+                                //console.log(this);
+                                if (type) {
+                                    var component = newComponent(type);
+                                    var html = component.getContainer();
+                                    source.replaceWith(html);
+                                    html.find('.layui-form-label,legend').click();
+                                    initPropertiesEditor(component);
+                                    designer.doEvent("configChanged", me);
+                                    parser.render();
+                                }
+                                cache[event.timeStamp] = 1;
+                                // initDroppable();
+                            }
+                        }
+                    }).disableSelection();
             }
 
             initDroppable();
@@ -100,7 +295,6 @@
             function openProperties(x, y) {
             }
 
-            var nowEditComponent;
 
             function newComponent(type) {
                 var id = md5(new Date().getTime() + "" + Math.random());
@@ -108,38 +302,16 @@
                 var html = component.render();
                 // $('.main-panel').append(html);
                 // $('.gridly').gridly();
-                html.on('click', function () {
-                    initPropertiesEditor(component);
-                    $(".brick").find(".layui-form-label,legend").css("border", "");
-                    $(this).find(".layui-form-label,legend").css("border", "1px solid red");
-                    layui.form.render();
-                    nowEditComponent = component;
-                });
+                initEvent(component)
+                initDroppable();
                 return component;
-            }
-
-            function addComponent(type) {
-                var id = md5(new Date().getTime() + "" + Math.random());
-                var component = Designer.newComponent(type, id);
-                var html = component.render();
-                // $('.main-panel').append(html);
-                // $('.gridly').gridly();
-                html.on('click', function () {
-                    initPropertiesEditor(component);
-                    $(".brick").find(".layui-form-label,legend").css("border", "");
-                    $(this).find(".layui-form-label,legend").css("border", "1px solid red");
-                    layui.form.render();
-                    nowEditComponent = component;
-                });
-                $(".components").children(".layui-row:last-child").append(html);
-                html.click();
-                initPropertiesEditor(component);
             }
 
             function removeComponent(id) {
                 var component = me.components[id];
                 if (component) {
                     component.remove();
+                    designer.doEvent("configChanged", me);
                 }
             }
 
@@ -148,29 +320,27 @@
             }
 
             function initPropertiesEditor(component) {
+                var designer = me;
                 saveProperties();
                 var offset = component.getContainer().offset();
-                openProperties(offset.top + 30 + "px", offset.left + 150 + "px");
-                var editors = component.editors;
+                var properties = component.getProperties();
                 var html = $("#component-properties");
                 html.children().remove();
-                var properties = component.properties;
-                $(editors).each(function () {
+                $(properties).each(function () {
                     var me = this;
-                    var propertyOld = properties[this.id];
                     var c = $("<div class=\"layui-form-item\">");
                     var label = $("<label class=\"layui-form-label\">");
                     var inputContainer = $("<div class=\"layui-input-block\">");
+                    var editor = me.editor;
                     var input = $("<input type=\"text\" name=\"identity\" class=\"layui-input\">");
                     label.text(this.text);
-                    if (propertyOld) {
-                        input.val(propertyOld.value);
-                    } else {
-                        component.setProperty({id: me.id, value: this.value});
+                    if (this.value) {
+                        input.val(this.value);
                     }
                     input.on("keyup", function () {
-                        component.setProperty({id: me.id, value: input.val()});
-                        layui.form.render();
+                        component.setProperty(me.id, input.val());
+                        reloadLayui();
+                        designer.doEvent("configChanged", me);
                     });
                     c.append(label).append(inputContainer.append(input));
                     html.append(c);
@@ -202,7 +372,7 @@
                     , "<meta name=\"apple-mobile-web-app-capable\" content=\"yes\">"
                     , "<meta name=\"format-detection\" content=\"telephone=no\">"
                     , "<title>hsweb 动态表单设计器</title>"
-                    , "<link rel=\"stylesheet\" href=\"http://res.layui.com/layui/dist/css/layui.css?t=1515376178709\">"
+                    , "<link rel=\"stylesheet\" href=\"http://www.hsweb.me/u/plugins/layui/css/layui.css\">"
                     , "</head>"
                     , "<body>"
                 ];
@@ -213,7 +383,7 @@
                 template.push(html[0].outerHTML);
                 template.push("</body>");
                 template.push(" </html>");
-                template.push("<script src=\"http://res.layui.com/layui/dist/layui.js?t=1515376178709\" charset=\"utf-8\"></script>");
+                template.push("<script src=\"http://www.hsweb.me/u/plugins/layui/layui.all.js\" charset=\"utf-8\"></script>");
 
                 // 创建隐藏的可下载链接
                 var eleLink = document.createElement('a');
@@ -231,7 +401,7 @@
             });
             $(document).keyup(function (e) {
                 if (e.keyCode === 46) {
-                    if (nowEditComponent) {
+                    if (me.nowEditComponent) {
                         $("#component-properties .delete-component").click();
                     }
                 }
@@ -241,5 +411,8 @@
     var designer = new Designer();
     window.setTimeout(function () {
         designer.init();
-    }, 100)
+    }, 100);
+    window.getDesigner = function () {
+        return designer;
+    }
 })();

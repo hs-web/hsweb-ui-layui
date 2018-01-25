@@ -12,6 +12,82 @@
 
 </head>
 <body>
+
+<div class="main-panel layui-container layui-form layui-form-pane" style="width: 100%">
+    <form class="layui-form" action="">
+
+        <div class="layui-row components ui-sortable ui-droppable" style="width: 100%;min-height: 600px;">
+            <div class="layui-col-md6" hs-id="d0c660ff2bf2421e961817e969b297bc">
+                <div class="layui-form-item brick"><label class="layui-form-label" style="">单行文本</label>
+                    <div class="layui-input-block"><input type="text" class="layui-input"></div>
+                </div>
+            </div>
+            <div class="layui-col-md6" hs-id="7e42042a4ad6be0488c7cbdb6d7ea291">
+                <div class="layui-form-item brick"><label class="layui-form-label" style="">密码框</label>
+                    <div class="layui-input-block"><input type="password" class="layui-input"></div>
+                </div>
+            </div>
+            <div class="layui-col-xs4 layui-col-md4" hs-id="9ba8287b758bf65ff60f5fae8ef48e9f">
+                <div class="layui-form-item brick"><label class="layui-form-label" style="">单选</label>
+                    <div class="layui-input-block"><input type="radio" name="9ba8287b758bf65ff60f5fae8ef48e9f" title="选项1">
+                        <div class="layui-unselect layui-form-radio"><i class="layui-anim layui-icon"></i>
+                            <div>选项1</div>
+                        </div>
+                        <input type="radio" name="9ba8287b758bf65ff60f5fae8ef48e9f" title="选项2">
+                        <div class="layui-unselect layui-form-radio"><i class="layui-anim layui-icon"></i>
+                            <div>选项2</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12" hs-id="7209a81182d6953f9349404ad17e4f94">
+                <div class="layui-form-text layui-form-item brick"><label class="layui-form-label" style="">多行文本</label>
+                    <div class="layui-input-block"><textarea class="layui-textarea"></textarea></div>
+                </div>
+            </div>
+            <div class="layui-col-xs6" hs-id="04881d549d146d0d7ac11934f43c73b0">
+                <div class="layui-form-item brick"><label class="layui-form-label" style="">日期输入</label>
+                    <div class="layui-input-block"><input type="text" class="layui-input date-picker" lay-key="2"></div>
+                </div>
+            </div>
+            <div class="layui-col-xs6" hs-id="94811ab4c9cab950ac7c42743087f87e">
+                <div class="layui-form-item brick"><label class="layui-form-label" style="">日期输入</label>
+                    <div class="layui-input-block"><input type="text" format="y年M月d日" class="layui-input date-picker" lay-key="3"></div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
 </body>
 </html>
 <script src="../../plugins/layui/layui.all.js"></script>
+<script src="parser.js"></script>
+<script type="text/javascript">
+    window.$ = layui.jquery;
+    lay(".date-picker").each(function () {
+        var fmt = lay(this).attr("format");
+        fmt = fmt || 'yyyy-MM-dd';
+        layui.laydate.render({
+            elem: this,
+            format: fmt
+        });
+    });
+    layui.form.render();
+    //监听提交
+    layui.form.on('submit(demo1)', function (data) {
+        layer.alert(JSON.stringify(data.field), {
+            title: '最终的提交信息'
+        });
+        return false;
+    });
+    var parser = new FormParser();
+    parser.config.elem = '.main-panel';
+    parser.render();
+</script>
