@@ -523,6 +523,16 @@
                 this.removeProperty("required");
                 this.getProperty("comment").value = "选项卡";
                 this.getProperty("size").value = "12";
+                this.properties.push({
+                    id:"tabs",
+                    editor:"table",
+                    text:"选项卡配置",
+                    columns:[
+                        {"field":"title","header":"标题"},
+                        {"field":"type","header":"类型"},
+                        {"field":"config","header":"配置"}
+                    ]
+                })
             }
 
             createClass(Tabs, "高级组件");
@@ -535,8 +545,7 @@
                     var content = $("<div class=\"layui-tab-content\">");
                     title.append("<li class=\"layui-this\">选项卡1</li>")
                         .append("<li>选项卡2</li>");
-                    content
-                        .append($("<div style='height: 200px' class=\"layui-tab-item layui-show components\"></div>"))
+                    content.append($("<div style='height: 200px' class=\"layui-tab-item layui-show components\"></div>"))
                         .append($("<div class=\"layui-tab-item nest-components\"></div>"));
                     c.append(title).append(content);
                     m.append(c);

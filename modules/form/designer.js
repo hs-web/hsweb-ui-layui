@@ -143,7 +143,14 @@ Component.prototype.remove = function () {
     Designer.prototype.getConfig = function () {
         var config = {};
         config.html = this.getHtml();
-        config.components = this.components;
+        var components = [];
+        for (var id in  this.components) {
+            var component = jQuery.extend({}, this.components[id]);
+            delete component.container;
+            delete component.events;
+            components.push(component);
+        }
+        config.components = components;
         return config;
     };
     Designer.prototype.getHtml = function () {
@@ -253,41 +260,65 @@ Component.prototype.remove = function () {
                 connectToSortable: ".components",
                 helper: "clone",
                 cursor: "move",
-                revert: "valid"
+                revert: false
             }).disableSelection();
             var cache = {};
-            function initDroppable() {
 
+            function initDroppable() {
                 $(".components")
                     .sortable({
-                        revert: true,
+                        // revert:"valid",
                         update: function () {
                             designer.doEvent("configChanged", me);
+                        }, start: function (event, ui) {
+                            var item = ui.item;
+                            var type = item.attr("hs-type");
+                            if (type) {
+                                item.css("width", "100%");
+                                var component = newComponent(type);
+                                var html = component.getContainer();
+                                item.children().remove();
+                                item.append(html);
+                                html.find('.layui-form-label,legend').click();
+                                initPropertiesEditor(component);
+                                designer.doEvent("configChanged", me);
+                                parser.render();
+                            }
+                            // initDroppable();
+                        }, stop: function (event, ui) {
+                            var item = ui.item;
+                            var type = item.attr("hs-type");
+                            if (type) {
+                                var item = ui.item;
+                                item.replaceWith(item.children());
+                                initDroppable();
+                            }
                         },
                         connectWith: ".component"
-                    })
-                    .droppable({
-                        greedy: true,
-                        accept: ".component",
-                        drop: function (event, ui) {
-                            var source = $(ui.draggable);
-                            var type = source.attr("hs-type");
-                            if (!cache[event.timeStamp]) {
-                                //console.log(this);
-                                if (type) {
-                                    var component = newComponent(type);
-                                    var html = component.getContainer();
-                                    source.replaceWith(html);
-                                    html.find('.layui-form-label,legend').click();
-                                    initPropertiesEditor(component);
-                                    designer.doEvent("configChanged", me);
-                                    parser.render();
-                                }
-                                cache[event.timeStamp] = 1;
-                                // initDroppable();
-                            }
-                        }
-                    }).disableSelection();
+                    });
+                // .droppable({
+                //     // greedy: true,
+                //     accept: ".component",
+                //     drop: function (event, ui) {
+                //         var source = $(ui.draggable);
+                //         console.log(1);
+                //         var type = source.attr("hs-type");
+                //         if (!cache[event.timeStamp]) {
+                //             //console.log(this);
+                //             if (type) {
+                //                 var component = newComponent(type);
+                //                 var html = component.getContainer();
+                //                 source.replaceWith(html);
+                //                 html.find('.layui-form-label,legend').click();
+                //                 initPropertiesEditor(component);
+                //                 designer.doEvent("configChanged", me);
+                //                 parser.render();
+                //             }
+                //             cache[event.timeStamp] = 1;
+                //             // initDroppable();
+                //         }
+                //     }
+                // }).disableSelection();
             }
 
             initDroppable();
@@ -303,7 +334,6 @@ Component.prototype.remove = function () {
                 // $('.main-panel').append(html);
                 // $('.gridly').gridly();
                 initEvent(component)
-                initDroppable();
                 return component;
             }
 
@@ -340,6 +370,7 @@ Component.prototype.remove = function () {
                     input.on("keyup", function () {
                         component.setProperty(me.id, input.val());
                         reloadLayui();
+                        initDroppable();
                         designer.doEvent("configChanged", me);
                     });
                     c.append(label).append(inputContainer.append(input));
@@ -380,17 +411,23 @@ Component.prototype.remove = function () {
                 var html = $(".main-panel");
                 html.find("hs-id").removeAttr("hs-id");
 
-                template.push(html[0].outerHTML);
+                template.push(me.getHtml());
                 template.push("</body>");
                 template.push(" </html>");
                 template.push("<script src=\"http://www.hsweb.me/u/plugins/layui/layui.all.js\" charset=\"utf-8\"></script>");
+                download("动态表单.html", template.join("\n"));
+            });
+            $(".export-config").on("click", function () {
+                download("动态表单.json", JSON.stringify(me.getConfig()));
+            });
 
+            function download(name, data) {
                 // 创建隐藏的可下载链接
                 var eleLink = document.createElement('a');
-                eleLink.download = "动态表单.html";
+                eleLink.download = name;
                 eleLink.style.display = 'none';
                 // 字符内容转变成blob地址
-                var blob = new Blob([template.join("\n")]);
+                var blob = new Blob([data]);
                 eleLink.href = URL.createObjectURL(blob);
                 // 触发点击
                 document.body.appendChild(eleLink);
@@ -398,7 +435,8 @@ Component.prototype.remove = function () {
                 // 然后移除
                 document.body.removeChild(eleLink);
                 // console.log(html[0].outerHTML);
-            });
+            }
+
             $(document).keyup(function (e) {
                 if (e.keyCode === 46) {
                     if (me.nowEditComponent) {
