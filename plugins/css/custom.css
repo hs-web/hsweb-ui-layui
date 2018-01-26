@@ -6,3 +6,42 @@
 .layui-tab {
     margin: 0;
 }
+.login-wrap {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background: #ffffff;
+    z-index: 999999;
+    display: none;
+}
+.login-wrap .layui-form {
+    width: 300px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
+.login-wrap .login-title {
+    font-size: 24px;
+    line-height: 2em;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.loading-wrap {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background: #ffffff;
+    z-index: 9999999;
+}
+
+/*表格*/
+.custom-table-tool,
+.custom-table-tool .custom-form-item{
+    margin-bottom: 15px;
+}

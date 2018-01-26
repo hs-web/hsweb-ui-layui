@@ -1,13 +1,31 @@
 window.API_BASE_PATH = "http://localhost:8080/";
+var lastAjax = '';
+
+function doLogin(callback) {
+    var $ = layui.jquery;
+    $('.loading-wrap').hide();
+    $('.login-wrap').show();
+
+    lastAjax = callback;
+}
+
 layui.config({
     dir: 'plugins/layui/'
     , version: false
     , debug: false
     , base: 'modules/'
+}).extend({
+    //模块
+    hsTable: 'components/hsTable',
+    // 页面
+    menuManage: 'pages/menuManage',
 });
-layui.use(['hsweb', "element"], function (r) {
+
+layui.use(['hsweb', "element", "form"], function (r) {
     var $ = layui.jquery;
-     var element = layui.element;
+    var element = layui.element;
+    var form = layui.form;
+
     layui.use('request', function (r) {
         r.get("menu/user-own/tree", function (e) {
             console.log(e);
@@ -15,8 +33,29 @@ layui.use(['hsweb', "element"], function (r) {
                 initTopMenu(e.result);
                 element.init();
                 $($("#top-menu").find("a")[0]).click();
+                $('.loading-wrap').hide();
             }
         })
+    });
+
+    //监听登录
+    form.on('submit(loginForm)', function (data) {
+        try{
+            layui.request.post("authorize/login", {username: data.field.username, password: data.field.password, token_type: "jwt"}, function (e) {
+                if( e.status == 200) {
+                    layui.sessionData("hsweb-token", {key: "accessToken", value: e.result.token});
+                    //使用后清空
+                    lastAjax();
+                    lastAjax = '';
+                    //隐藏login
+                    $('.login-wrap').hide();
+                }
+                console.log(e);
+            }, false);
+        } catch (e) {
+            console.log(e)
+        }
+        return false;
     });
 
     function initTopMenu(menus) {
@@ -56,11 +95,12 @@ layui.use(['hsweb', "element"], function (r) {
         if ($("[lay-id=" + menu.id + "]").length === 0) {
             layui.element.tabAdd('tabs', {
                 title: menu.name
-                , content:'<div id="container-'+menu.id+'"></div>'
+                , content: '<div id="tools-' + menu.id + '"></div><div id="container-' + menu.id + '"></div>'
                 , id: menu.id
             });
-            layui.use("user",function () {
-                layui.user.init("#container-"+menu.id);
+            layui.use(menu.url, function () {
+                var mod = layui[menu.url];
+                mod.init(menu.id);
             });
         }
         layui.element.tabChange('tabs', menu.id);

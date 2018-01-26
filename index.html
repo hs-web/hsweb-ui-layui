@@ -62,7 +62,32 @@
     <div class="layui-footer">
 
     </div>
+
+
 </div>
+
+<!--登录-->
+<div class="login-wrap">
+    <form class="layui-form" action="">
+        <div class="login-title">
+            LOGO
+        </div>
+        <div class="layui-form-item">
+            <input type="text" name="username" required  lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-form-item">
+            <input type="password" name="password" required lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-form-item">
+            <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="loginForm">登录</button>
+        </div>
+    </form>
+</div>
+
+
+<!--loading-->
+<div class="loading-wrap"></div>
+
 <script src="plugins/layui/layui.js"></script>
 <script src="modules/index.js"></script>
 </body>
