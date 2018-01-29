@@ -16,36 +16,36 @@ layui.config({
 }).extend({
     //模块
     hsTable: 'components/hsTable',
+    hsForm: 'components/hsForm',
     // 页面
     menuManage: 'pages/menuManage',
 });
 
-layui.use([ "element", "form"], function () {
+layui.use([ "element", "form","request","hsForm"], function () {
     var $ = layui.jquery;
     var element = layui.element;
     var form = layui.form;
+    var r = layui.request;
 
     //自定义配置项
     var AppConfig = {
         footer: false,
     };
 
-    layui.use('request', function (r) {
-        r.get("menu/user-own/tree", function (e) {
-            console.log(e);
-            if (e.status === 200) {
-                initTopMenu(e.result);
-                element.init();
-                $($("#top-menu").find("a")[0]).click();
-                $('.loading-wrap').hide();
-            }
-        })
+    r.get("menu/user-own/tree", function (e) {
+        console.log(e);
+        if (e.status === 200) {
+            initTopMenu(e.result);
+            element.init();
+            $($("#top-menu").find("a")[0]).click();
+            $('.loading-wrap').hide();
+        }
     });
 
     //监听登录
     form.on('submit(loginForm)', function (data) {
         try{
-            layui.request.post("authorize/login", {username: data.field.username, password: data.field.password, token_type: "jwt"}, function (e) {
+            r.post("authorize/login", {username: data.field.username, password: data.field.password, token_type: "jwt"}, function (e) {
                 if( e.status == 200) {
                     layui.sessionData("hsweb-token", {key: "accessToken", value: e.result.token});
                     //使用后清空

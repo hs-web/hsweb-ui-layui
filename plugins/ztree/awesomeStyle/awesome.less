@@ -9,13 +9,14 @@ website:    http://code.google.com/p/jquerytree/
 -------------------------------------*/
 
 /* Definitions ----------------------*/
-@font-size: 12px;
+@font-size: 14px;
+@icon-size: 16px;
 // Regular icon and text color is white, which suits any medium -> dark background 
-@color-normal: white;
+@color-normal: #333;
 // Background color
-@color-bg: #af0000;
+@color-bg: transparent;
 // Highlight color
-@color-highlight: yellow;
+@color-highlight: #333;
 // Partially selected (checkboxes, radio buttons)
 @color-partial: #aaaaaa;
 // Partially selected and focused (checkboxes, radio buttons)
@@ -24,10 +25,10 @@ website:    http://code.google.com/p/jquerytree/
 @color-disabled: #808080;
 // Editing color
 @color-edit: yellow;
-@w: 15px;
-@h: 17px;
-@pad-left: 2px;
-@pad-top: 10px;
+@w: 25px;
+@h: 25px;
+@pad-left: 0;
+@pad-top: 0;
 /* End of Definitions ---------------*/
 
 /* Imports  -------------------------*/
@@ -38,7 +39,7 @@ website:    http://code.google.com/p/jquerytree/
 .ztree {
     margin:0; padding:5px; color:@color-normal; background-color: @color-bg;
     li {
-        padding:0; margin:0; list-style:none; line-height:17px; text-align:left; white-space:nowrap; outline:0;
+        padding:4px 0; margin:0; list-style:none; line-height:17px; text-align:left; white-space:nowrap; outline:0;
         ul { 
             margin: 0px; padding:0 0 0 18px;
         }
@@ -49,20 +50,19 @@ website:    http://code.google.com/p/jquerytree/
                           color: @color-bg; background-color: @color-normal;
                         font-size:@font-size; border:1px #585956 solid; *border:0px}
         }
-        a:hover {text-decoration:underline}
-        a.curSelectedNode {padding-top:0px; background-color:#af4040; color:@color-highlight; height:@h; opacity:0.8;}
-        a.curSelectedNode_Edit {padding-top:0px; background-color:transparent; color:@color-highlight; height:@h; border:1px #666 solid; opacity:0.8;}
-        a.tmpTargetNode_inner {padding-top:0px; background-color:#aaa; color:@color-highlight; height:@h; border:1px #666 solid;
-          opacity:0.8; filter:alpha(opacity=80)}
+        a:hover {text-decoration:none;background-color:#e6f7ff;}
+        a.curSelectedNode {padding-top:0px; background-color:#bae7ff; color:@color-normal; height:@h;}
+        a.curSelectedNode_Edit {padding-top:0px; background-color:transparent; color:@color-highlight; height:@h; border:1px #666 solid;}
+        a.tmpTargetNode_inner {padding-top:0px; background-color:#aaa; color:@color-highlight; height:@h; border:1px #666 solid;}
         a.tmpTargetNode_prev {}
         a.tmpTargetNode_next {}
         span {line-height:@h; margin-right:2px; background-color:transparent;}
-        span.button {line-height:0; margin:0; padding: 0; width:@w; height:@h; display: inline-block; vertical-align:top;
-          border:0px solid; cursor: pointer;outline:none;
+        span.button { margin:0; padding: 0; width:@w; height:@h; display: inline-block; vertical-align:top;font-size:@icon-size;
+          border:0px solid; cursor: pointer;outline:none;text-align:center;
           background-color:transparent; background-repeat:no-repeat; background-attachment: scroll;
  
-            &::before{color: @color-normal; font-family: FontAwesome; padding-top:@pad-top;}
-            &.chk { margin:0px; cursor: auto; width: 12px;
+            &::before{color: @color-normal; font-family: FontAwesome;box-sizing: border-box;}
+            &.chk { margin:0px; cursor: auto;
                 display: inline-block;padding-top:@pad-top;padding-left:@pad-left;
                 
                 &.checkbox_false_full::before {content: @fa-square-o;}
@@ -92,25 +92,25 @@ website:    http://code.google.com/p/jquerytree/
                 
             }
             &.switch  {width:@w; height:@h}
-            &.root_open::before{content: @fa-chevron-down;padding-top:@pad-top;padding-left:@pad-left;display: inline-block;}
-            &.root_close::before{content: @fa-folder-open-o;padding-top:@pad-top;padding-left:@pad-left;display: inline-block;}
-            &.roots_open::before{content: @fa-chevron-down;padding-top:@pad-top;padding-left:@pad-left;display: inline-block;}
-            &.roots_close::before{content: @fa-chevron-right;padding-top:@pad-top;padding-left:@pad-left;display: inline-block;}
-            &.center_open::before{content: @fa-chevron-down;padding-top:@pad-top;padding-left:@pad-left;display: inline-block;}
-            &.center_close::before{content: @fa-chevron-right;padding-top:@pad-top;padding-left:@pad-left;display: inline-block;}
-            &.bottom_open::before{content: @fa-chevron-down;padding-top:@pad-top;padding-left:@pad-left;display: inline-block;}
-            &.bottom_close::before{content: @fa-chevron-right;padding-top:@pad-top;padding-left:@pad-left;display: inline-block;}  
+            &.root_open::before{content: @fa-caret-down;}
+            &.root_close::before{content: @fa-folder-open-o;}
+            &.roots_open::before{content: @fa-caret-down;}
+            &.roots_close::before{content: @fa-caret-right;}
+            &.center_open::before{content: @fa-caret-down;}
+            &.center_close::before{content: @fa-caret-right;}
+            &.bottom_open::before{content: @fa-caret-down;}
+            &.bottom_close::before{content: @fa-caret-right;}
             &.noline_open{}
             &.noline_close{}
             &.root_docu{ background:none;}
-            &.roots_docu::before{content: @fa-list-alt;padding-left:@pad-left;display: inline-block;color:@color-normal;}
-            &.center_docu::before{padding-top:@pad-top;padding-left:@pad-left;display: inline-block;color:@color-normal;}
-            &.bottom_docu::before{padding-top:@pad-top;padding-left:@pad-left;display: inline-block;color:@color-normal;}
+            &.roots_docu::before{content: @fa-list-alt;color:@color-normal;}
+            &.center_docu::before{padding-top:@pad-top;color:@color-normal;}
+            &.bottom_docu::before{padding-top:@pad-top;color:@color-normal;}
             &.noline_docu{ background:none;}
     
-            &.ico_open::before {content: @fa-folder-open-o;font-family: FontAwesome;padding-top:@pad-top;padding-left:@pad-left;display: inline-block;color:@color-normal;}
-            &.ico_close::before {content: @fa-folder-o;font-family: FontAwesome;padding-top:@pad-top;padding-left:@pad-left;display: inline-block;color:@color-normal;}
-            &.ico_docu::before{content: @fa-list-alt;font-family: FontAwesome;padding-top:@pad-top;padding-left:@pad-left;display: inline-block;color:@color-normal;}
+            &.ico_open::before {content: @fa-folder-open-o;font-family: FontAwesome;color:@color-normal;}
+            &.ico_close::before {content: @fa-folder-o;font-family: FontAwesome;color:@color-normal;}
+            &.ico_docu::before{content: @fa-list-alt;font-family: FontAwesome;color:@color-normal;}
             
             &.edit {margin-left:4px; margin-right: -1px;  vertical-align:top; *vertical-align:middle;padding-top:@pad-top;}
             &.edit::before{content: @fa-pencil-square-o;font-family: FontAwesome;}
@@ -129,7 +129,7 @@ website:    http://code.google.com/p/jquerytree/
 }
 
 
-ul.tmpTargetzTree {background-color:#FFE6B0; opacity:0.8; filter:alpha(opacity=80)}
+ul.tmpTargetzTree {background-color:#FFE6B0;}
 
 // this is the arrow that moves 
 span.tmpzTreeMove_arrow{width:16px; height:@h; display: inline-block; 
@@ -141,6 +141,6 @@ span.tmpzTreeMove_arrow::before{content: @fa-play;font-family: FontAwesome;color
 // outline
 
 ul.ztree.zTreeDragUL {margin:0; padding:0; position:absolute; width:auto; height:auto;overflow:hidden; 
-             background-color:#cfcfcf; border:1px @color-highlight dotted; opacity:0.8; filter:alpha(opacity=80)}
-.ztreeMask {z-index:10000; background-color:#cfcfcf; opacity:0.0; filter:alpha(opacity=0); position:absolute}
+             background-color:#cfcfcf; border:1px @color-highlight dotted; }
+.ztreeMask {z-index:10000; background-color:#cfcfcf; position:absolute}
 
