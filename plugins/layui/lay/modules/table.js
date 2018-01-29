@@ -408,7 +408,7 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
 
         if (options.url) { //Ajax请求
             var params = {};
-            params[request.pageName] = curr;
+            params[request.pageName] = curr-1;
             params[request.limitName] = options.limit;
 
             $(options.sorts).each(function (i, e) {

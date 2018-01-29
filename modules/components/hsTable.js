@@ -72,7 +72,9 @@ layui.define(["jquery", "element", "request", "form", "table","laytpl"], functio
                 pageName: 'pageIndex' //页码的参数名称，默认：page
                 , limitName: 'pageSize' //每页数据量的参数名，默认：limit
             },
-            page: true,
+            page: {
+                curr: 1,
+            },
             sorts: sorts,
             response: {
                 statusName: 'status' //数据状态的字段名称，默认：code
