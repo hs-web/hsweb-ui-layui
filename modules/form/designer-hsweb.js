@@ -20,22 +20,41 @@
                 value: ""
             }, {
                 id: "size",
-                editor: "radio",
                 text: "控件大小",
                 value: "6",
-                data: [
-                    {text: "大", value: 'large'},
-                    {text: "小", value: 'small'}
-                ]
+                createEditor: function (component, text, value) {
+                    var html = $("<div style='margin-left: 4px;position: relative;top: 12px;'>");
+                    html.slider({
+                        orientation: "horizontal",
+                        range: "min",
+                        min: 1,
+                        max: 12,
+                        value: value,
+                        slide: function () {
+                            component.setProperty("size", arguments[1].value);
+                        }
+                    });
+                    return html;
+                }
             }, {
                 id: "mdSize",
                 editor: "radio",
                 text: "移动端大小",
                 value: "12",
-                data: [
-                    {text: "大", value: 'large'},
-                    {text: "小", value: 'small'}
-                ]
+                createEditor: function (component, text, value) {
+                    var html = $("<div style='margin-left: 4px;position: relative;top: 12px;'>");
+                    html.slider({
+                        orientation: "horizontal",
+                        range: "min",
+                        min: 1,
+                        max: 12,
+                        value: value,
+                        slide: function () {
+                            component.setProperty("mdSize", arguments[1].value);
+                        }
+                    });
+                    return html;
+                }
             },
 
             {
@@ -43,6 +62,20 @@
                 editor: "radio",
                 text: "是否必填",
                 value: "false",
+                createEditor: function (component, text, value) {
+                    var id = md5("" + Math.random());
+                    var checkbox1 = $("<input type=\"radio\" name='" + id + "' value='true' lay-filter='" + id + "' title='是'>");
+                    var checkbox2 = $("<input type=\"radio\" name='" + id + "' value='false' lay-filter='" + id + "' title='否'>");
+                    if (value === true) {
+                        checkbox1.prop("checked", "checked");
+                    } else {
+                        checkbox2.prop("checked", "checked");
+                    }
+                    layui.form.on("radio(" + id + ")", function (data) {
+                        component.setProperty("required", data.value === 'true' ? true : undefined);
+                    });
+                    return $("<div>").append(checkbox1).append(checkbox2).children();
+                },
                 data: [
                     {text: "是", value: true},
                     {text: "否", value: false}
