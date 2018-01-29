@@ -1,11 +1,10 @@
 window.API_BASE_PATH = "http://localhost:8080/";
-var lastAjax = '';
 
+var lastAjax = '';
 function doLogin(callback) {
     var $ = layui.jquery;
     $('.loading-wrap').hide();
     $('.login-wrap').show();
-
     lastAjax = callback;
 }
 
@@ -21,10 +20,15 @@ layui.config({
     menuManage: 'pages/menuManage',
 });
 
-layui.use(['hsweb', "element", "form"], function (r) {
+layui.use([ "element", "form"], function () {
     var $ = layui.jquery;
     var element = layui.element;
     var form = layui.form;
+
+    //自定义配置项
+    var AppConfig = {
+        footer: false,
+    };
 
     layui.use('request', function (r) {
         r.get("menu/user-own/tree", function (e) {
@@ -134,4 +138,10 @@ layui.use(['hsweb', "element", "form"], function (r) {
         $(leftMenu.children()[0]).addClass("layui-nav-itemed");
         layui.element.init();
     }
+    //读取配置信息
+    if(!AppConfig.footer){
+        $('.layui-footer').hide();
+        $('.layui-body').css('bottom','0');
+    }
 });
+

@@ -65,7 +65,7 @@ layui.define(["jquery", "element", "request", "form", "table","laytpl"], functio
             url: window.API_BASE_PATH + url,
             cols: cols,
             ajaxSort: true,
-            height: 'full-210',
+            // height: 'full-210',
             //where: {token: 'sasasas', id: 123} //如果无需传递额外参数，可不加该参数
             //method: 'post' //如果无需自定义HTTP类型，可不加该参数
             request: {
