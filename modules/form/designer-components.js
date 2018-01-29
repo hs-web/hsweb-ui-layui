@@ -20,29 +20,61 @@
                 value: ""
             }, {
                 id: "size",
-                editor: "radio",
                 text: "控件大小",
                 value: "6",
-                data: [
-                    {text: "大", value: 'large'},
-                    {text: "小", value: 'small'}
-                ]
+                createEditor: function (component, text, value) {
+                    var html = $("<div style='margin-left: 4px;position: relative;top: 12px;'>");
+                    html.slider({
+                        orientation: "horizontal",
+                        range: "min",
+                        min: 1,
+                        max: 12,
+                        value: value,
+                        slide: function () {
+                            component.setProperty("size", arguments[1].value);
+                        }
+                    });
+                    return html;
+                }
             }, {
                 id: "mdSize",
                 editor: "radio",
                 text: "移动端大小",
                 value: "12",
-                data: [
-                    {text: "大", value: 'large'},
-                    {text: "小", value: 'small'}
-                ]
+                createEditor: function (component, text, value) {
+                    var html = $("<div style='margin-left: 4px;position: relative;top: 12px;'>");
+                    html.slider({
+                        orientation: "horizontal",
+                        range: "min",
+                        min: 1,
+                        max: 12,
+                        value: value,
+                        slide: function () {
+                            component.setProperty("mdSize", arguments[1].value);
+                        }
+                    });
+                    return html;
+                }
             },
-
             {
                 id: "required",
                 editor: "radio",
                 text: "是否必填",
                 value: "false",
+                createEditor: function (component, text, value) {
+                    var id = md5("" + Math.random());
+                    var checkbox1 = $("<input type=\"radio\" name='" + id + "' value='true' lay-filter='" + id + "' title='是'>");
+                    var checkbox2 = $("<input type=\"radio\" name='" + id + "' value='false' lay-filter='" + id + "' title='否'>");
+                    if (value === true) {
+                        checkbox1.prop("checked", "checked");
+                    } else {
+                        checkbox2.prop("checked", "checked");
+                    }
+                    layui.form.on("radio(" + id + ")", function (data) {
+                        component.setProperty("required", data.value === 'true' ? true : undefined);
+                    });
+                    return $("<div>").append(checkbox1).append(checkbox2).children();
+                },
                 data: [
                     {text: "是", value: true},
                     {text: "否", value: false}
@@ -131,7 +163,11 @@
                         if (name === 'comment') {
                             container.find("label").text(value);
                         } else {
-                            container.find("input").attr(name, value);
+                            if (typeof value === 'undefined') {
+                                container.find("input").removeAttr(name);
+                            } else {
+                                container.find("input").attr(name, value);
+                            }
                         }
                     });
                 return container;
@@ -183,6 +219,7 @@
                 Component.call(this);
                 this.id = id;
                 this.properties = createDefaultEditor();
+                this.getProperty("size").value = 12;
                 this.getProperty("comment").value = "多行文本";
             }
 
@@ -287,7 +324,11 @@
                         } else if (name === 'name' || name === 'data' || name === 'skin') {
                             initData();
                         } else {
-                            container.find("input").attr(name, value);
+                            if (typeof value === 'undefined') {
+                                container.find("input").removeAttr(name);
+                            } else {
+                                container.find("input").attr(name, value);
+                            }
                         }
                     });
                 return container;
@@ -364,7 +405,11 @@
                         } else if (name === 'name' || name === 'data') {
                             initData();
                         } else {
-                            container.find("input").attr(name, value);
+                            if (typeof value === 'undefined') {
+                                container.find("input").removeAttr(name);
+                            } else {
+                                container.find("input").attr(name, value);
+                            }
                         }
                     });
                 return container;
@@ -437,10 +482,14 @@
 
                         if (name === 'comment') {
                             container.find("label").text(value);
-                        } else if (name === 'data' || name === 'data') {
+                        } else if (name === 'data') {
                             initData();
                         } else {
-                            container.find("select").attr(name, value);
+                            if (typeof value === 'undefined') {
+                                container.find("select").removeAttr(name);
+                            } else {
+                                container.find("select").attr(name, value);
+                            }
                         }
                     });
                 return container;
@@ -519,25 +568,60 @@
                 this.id = id;
                 this.properties = createDefaultEditor();
                 this.removeProperty("placeholder");
-                this.removeProperty("name");
                 this.removeProperty("required");
                 this.getProperty("comment").value = "选项卡";
                 this.getProperty("size").value = "12";
                 this.properties.push({
-                    id:"tabs",
-                    editor:"table",
-                    text:"选项卡配置",
-                    columns:[
-                        {"field":"title","header":"标题"},
-                        {"field":"type","header":"类型"},
-                        {"field":"config","header":"配置"}
-                    ]
+                    id: "tabs",
+                    editor: "table",
+                    text: "选项卡配置",
+                    createEditor: function (compent, text, value) {
+                        var button = $("<button class='layui-btn'>").text("编辑配置");
+                        button.on("click", function () {
+                            var value = compent.getProperty("tabs");
+
+                            var table = "<table lay-filter=\"tabs-config-table\">\n" +
+                                "  <thead>\n" +
+                                "    <tr>\n" +
+                                "      <th lay-data=\"{field:'name',edit:'text', width:200}\">选项卡名称</th>\n" +
+                                "      <th lay-data=\"{field:'type',edit:'radio', width:150}\">选项卡类型</th>\n" +
+                                "      <th lay-data=\"{field:'config', minWidth: 180}\">选项卡配置</th>\n" +
+                                "    </tr> \n" +
+                                "  </thead>\n" +
+                                "  <tbody>\n" +
+                                "    <tr>\n" +
+                                "      <td>选项卡1</td>\n" +
+                                "      <td>子表单</td>\n" +
+                                "      <td></td>\n" +
+                                "    </tr>\n" +
+                                "  </tbody>\n" +
+                                "</table>";
+                            var tableObj;
+                            layer.open({
+                                type: 1,
+                                title: "选项卡配置",
+                                // skin: 'layui-layer-rim', //加上边框
+                                area: ['50%', '80%'], //宽高
+                                content: table,
+                                btn: "确定",
+                                yes: function () {
+                                    compent.setProperty("tabs", tableObj.cache);
+                                    return true;
+                                }
+                            });
+                            tableObj = layui.table.init('tabs-config-table', { //转化静态表格
+                                //height: 'full-500'
+                            });
+                        });
+                        return button;
+                    }
                 })
             }
 
             createClass(Tabs, "高级组件");
 
             Tabs.prototype.render = function () {
+                var me = this;
                 var container = this.getContainer(function () {
                     var m = $("<div class='layui-col-md12 brick'>");
                     var c = $("<div class=\"layui-tab\" >");
@@ -545,16 +629,44 @@
                     var content = $("<div class=\"layui-tab-content\">");
                     title.append("<li class=\"layui-this\">选项卡1</li>")
                         .append("<li>选项卡2</li>");
-                    content.append($("<div style='height: 200px' class=\"layui-tab-item layui-show components\"></div>"))
-                        .append($("<div class=\"layui-tab-item nest-components\"></div>"));
+                    content.append($("<div style='height: 100px' class=\"layui-tab-item layui-show components\" >"))
+                        .append($("<div style='height: 100px' class=\"layui-tab-item layui-show components\">"));
                     c.append(title).append(content);
                     m.append(c);
                     return m;
                 });
+
+                function initTabs() {
+                    var value = me.getProperty("tabs");
+                    if (value) {
+                        if (typeof value === 'string') {
+                            value = JSON.parse(value);
+                        }
+                        var tab = $(".layui-tab:first");
+                        var title = tab.find(".layui-tab-title");
+                        var content = tab.find(".layui-tab-content");
+
+                        $(value).each(function () {
+                            var id = this.id;
+                            title.append($("<li>")
+                                .attr("hs-tab-id", id)
+                                .text(this.name));
+                            var body = content.find("[hs-tab-id='" + id + "']");
+                            if (!body.length) {
+                                body = $("<div style='height: 100px' class=\"layui-tab-item layui-show components\">")
+                                    .attr("hs-tab-id", id);
+                            }
+                            content.append(body);
+                        })
+                    }
+                }
+
                 this.un("propertiesChanged")
                     .on('propertiesChanged', function (key, value) {
                         if (key === 'comment') {
                             container.find("legend").text(value);
+                        } else if (key === 'tabs') {
+                            initTabs();
                         } else {
                             container.find("legend").attr(key, value);
                         }
@@ -603,7 +715,7 @@
                 this.un("propertiesChanged")
                     .on('propertiesChanged', function (key, value) {
                         if (key === 'url') {
-                            container.find("iframe").attr("src",value);
+                            container.find("iframe").attr("src", value);
                         }
                         if (key === 'comment') {
                             container.find("legend").text(value);

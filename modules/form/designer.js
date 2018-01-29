@@ -144,7 +144,12 @@ Component.prototype.remove = function () {
         var config = {};
         config.html = this.getHtml();
         var components = [];
-        for (var id in  this.components) {
+        var html = $(config.html);
+        for (var id in this.components) {
+            var container = html.find("[hs-id=" + id + "]");
+            if (container.length === 0) {
+                continue;
+            }
             var component = jQuery.extend({}, this.components[id]);
             delete component.container;
             delete component.events;
@@ -174,7 +179,6 @@ Component.prototype.remove = function () {
                 $(".component-info").parent().parent().css("border", "");
                 html.find(".layui-form-label,legend").css("border", "1px solid red");
                 html.find(".component-info").parent().parent().css("border", "1px solid red");
-
                 reloadLayui();
                 me.nowEditComponent = component;
             }
@@ -187,17 +191,26 @@ Component.prototype.remove = function () {
         me.loadConfig = function (config) {
             var html = $(config.html);
             var components = config.components;
-            for (var id in components) {
-                var component = components[id];
+            $(components).each(function () {
+                var id = this.id;
+                var container = html.find("[hs-id=" + id + "]");
+                if (container.length === 0) {
+                    return;
+                }
+                var component = this;
                 var type = component.type;
-                var realComponent = this.createComponent(type, id);
-                realComponent.container = html.find("[hs-id=" + id + "]");
-                realComponent.properties = component.properties;
+                var realComponent = me.createComponent(type, id);
+                realComponent.container = container;
+                $(component.properties)
+                    .each(function () {
+                        realComponent.setProperty(this.id, this.value);
+                    });
                 realComponent.config = component.config;
                 initEvent(realComponent);
-            }
+            });
             $(".main-panel").replaceWith(html);
             initDroppable();
+            reloadLayui();
         };
 
         function reloadLayui() {
@@ -279,19 +292,22 @@ Component.prototype.remove = function () {
                                 var html = component.getContainer();
                                 item.children().remove();
                                 item.append(html);
-                                html.find('.layui-form-label,legend').click();
-                                initPropertiesEditor(component);
+                               // html.find('.layui-form-label,legend').click();
+                               // initPropertiesEditor(component);
                                 designer.doEvent("configChanged", me);
                                 parser.render();
+                                me.nowEditComponent=component;
                             }
                             // initDroppable();
                         }, stop: function (event, ui) {
                             var item = ui.item;
                             var type = item.attr("hs-type");
                             if (type) {
-                                var item = ui.item;
-                                item.replaceWith(item.children());
+                                var children = item.children();
+
+                                item.replaceWith(children);
                                 initDroppable();
+                                children.find('.layui-form-label,legend,input,.component-info').click();
                             }
                         },
                         connectWith: ".component"
@@ -341,6 +357,7 @@ Component.prototype.remove = function () {
                 var component = me.components[id];
                 if (component) {
                     component.remove();
+                    delete me.components[id];
                     designer.doEvent("configChanged", me);
                 }
             }
@@ -352,7 +369,6 @@ Component.prototype.remove = function () {
             function initPropertiesEditor(component) {
                 var designer = me;
                 saveProperties();
-                var offset = component.getContainer().offset();
                 var properties = component.getProperties();
                 var html = $("#component-properties");
                 html.children().remove();
@@ -361,19 +377,24 @@ Component.prototype.remove = function () {
                     var c = $("<div class=\"layui-form-item\">");
                     var label = $("<label class=\"layui-form-label\">");
                     var inputContainer = $("<div class=\"layui-input-block\">");
-                    var editor = me.editor;
-                    var input = $("<input type=\"text\" name=\"identity\" class=\"layui-input\">");
                     label.text(this.text);
-                    if (this.value) {
-                        input.val(this.value);
+                    if (me.createEditor) {
+                        var e = me.createEditor(component, this.text, this.value);
+                        inputContainer.append(e);
+                    } else {
+                        var input = $("<input type=\"text\" name=\"identity\" class=\"layui-input\">");
+                        if (this.value) {
+                            input.val(this.value);
+                        }
+                        input.on("keyup", function () {
+                            component.setProperty(me.id, input.val());
+                            reloadLayui();
+                            initDroppable();
+                            designer.doEvent("configChanged", me);
+                        });
+                        inputContainer.append(input);
                     }
-                    input.on("keyup", function () {
-                        component.setProperty(me.id, input.val());
-                        reloadLayui();
-                        initDroppable();
-                        designer.doEvent("configChanged", me);
-                    });
-                    c.append(label).append(inputContainer.append(input));
+                    c.append(label).append(inputContainer);
                     html.append(c);
                 });
                 var button = $("<button>");
@@ -385,6 +406,7 @@ Component.prototype.remove = function () {
                 });
                 button.text("删除");
                 html.append(button);
+                reloadLayui()
             }
 
             function fixLayout() {
