@@ -30,7 +30,7 @@ layui.define(["jquery", "element", "request", "form", "table","laytpl"], functio
                 if(item.type == 'input') {
                     var formInput = $('<input type="text" class="layui-input">').attr('name',item.column);
                 } else if(item.type == 'select') {
-                    var formInput = $('<select name="city"></select>').attr('name',item.column);
+                    var formInput = $('<select></select>').attr('name',item.column);
                     formInput.append($('<option></option>'))
                     item.options.forEach(function(opt) {
                         formInput.append($('<option></option>').text(opt.text).attr('value',opt.value))
