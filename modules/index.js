@@ -30,9 +30,10 @@ layui.use([ "element", "form","request","hsForm"], function () {
     layui.hsForm.init('#d1');
     layui.hsForm.init('#d2');
 
-    //监听登录
+    //监听测试
     form.on('submit(test1)', function (data) {
-        console.log(data.field);
+        console.log(layui.hsForm.format(data.field));
+
         return false;
     });
 

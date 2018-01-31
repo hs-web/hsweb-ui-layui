@@ -116,10 +116,22 @@ layui.define(["jquery", "element", "request", "form"], function (exports) {
         }
     }
 
+    //格式化数据
     function hsFormat(data) {
+        var formattedData = {};
         for (x in data) {
-            console.log(x);
+            var i = x.indexOf('[');
+            if(i > 0) {
+                if (formattedData[x.substring(0,i)]){
+                    formattedData[x.substring(0,i)] += ',' + x.substring(i+1,x.length-1)
+                } else {
+                    formattedData[x.substring(0,i)] = x.substring(i+1,x.length-1)
+                }
+            }else {
+                formattedData[x] = data[x]
+            }
         }
+        return formattedData;
     }
 
     //渲染select
