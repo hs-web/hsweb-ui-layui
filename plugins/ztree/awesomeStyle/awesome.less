@@ -44,7 +44,7 @@ website:    http://code.google.com/p/jquerytree/
             margin: 0px; padding:0 0 0 18px;
         }
         ul.line { }
-        a {padding-right:3px; margin:0; cursor:pointer; height:@h; color:@color-normal; background-color: transparent; 
+        a {width: calc(100% - 40px);padding-right:3px; margin:0; cursor:pointer; height:@h; color:@color-normal; background-color: transparent;
             text-decoration:none; vertical-align:top; display: inline-block;
             input.rename {height:14px; width:80px; padding:0; margin:0;
                           color: @color-bg; background-color: @color-normal;
@@ -93,7 +93,7 @@ website:    http://code.google.com/p/jquerytree/
             }
             &.switch  {width:@w; height:@h}
             &.root_open::before{content: @fa-caret-down;}
-            &.root_close::before{content: @fa-folder-open-o;}
+            &.root_close::before{content: @fa-caret-right;}
             &.roots_open::before{content: @fa-caret-down;}
             &.roots_close::before{content: @fa-caret-right;}
             &.center_open::before{content: @fa-caret-down;}
