@@ -1,7 +1,9 @@
-layui.define(["jquery", "element", "request", "form"], function (exports) {
+layui.define(["jquery", "element", "request", "form", "layer", "laydate"], function (exports) {
     var element = layui.element,
         request = layui.request,
-        form = layui.form;
+        form = layui.form,
+        layer = layui.layer,
+        laydate = layui.laydate;
 
     function init(ele) {
         //读取配置
@@ -158,7 +160,7 @@ layui.define(["jquery", "element", "request", "form"], function (exports) {
         treeSelect.append(title);
         treeSelect.append(tree);
 
-        title.on('click',function () {
+        title.on('click', function () {
             treeSelect.hasClass('expanded') ? (
                 hideDown()
             ) : (
@@ -170,6 +172,7 @@ layui.define(["jquery", "element", "request", "form"], function (exports) {
         function hideDown(choose) {
             treeSelect.removeClass('expanded');
         }
+
         function showDown(choose) {
             treeSelect.addClass('expanded');
         }
@@ -204,9 +207,55 @@ layui.define(["jquery", "element", "request", "form"], function (exports) {
         return treeSelect;
     }
 
+    function openForm(template, callback) {
+        var formId = "f" + new Date().getTime();
+        var html = [
+            "<form class='layui-form layui-form-pane' onsubmit='return false' action=''>",
+            "<div class='layui-row'>",
+            template.html,
+            "</div>",
+            "<div style='width: 200px;margin: auto'>",
+            "<button class='layui-btn' lay-submit lay-filter='" + formId + "'>提交</button>",
+            "<button type='reset' class='layui-btn layui-btn-danger' lay-reset>重置</button>",
+            "</div>",
+            "</form>"
+        ];
+        layer.open({
+            type: 1,
+            title: "选项卡配置",
+            // skin: 'layui-layer-rim', //加上边框
+            area: ['50%', '80%'], //宽高
+            // btn: "确定",
+            content: html.join(""),
+            yes: function () {
+                return true;
+            }
+        });
+        form.render();
+        element.render();
+        $(".date-picker").each(function () {
+            var fmt = $(this).attr("format");
+            fmt = fmt || 'yyyy-MM-dd';
+            layui.laydate.render({
+                elem: this,
+                format: fmt
+            });
+        });
+        form.on('submit(' + formId + ')', function (data) {
+            console.log(hsFormat(data.field));
+            try {
+                callback(data);
+            } catch (e) {
+                console.error(e);
+            }
+            return false;
+        });
+    }
+
     var e = {
         init: init,
         format: hsFormat,
+        openForm: openForm
     };
 
     exports("hsForm", e);
