@@ -191,20 +191,34 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
 
     //格式化数据
     function hsFormat(data) {
-        var formattedData = {};
+        var fd = {};
         for (x in data) {
+            var d = x.indexOf('.');
             var i = x.indexOf('[');
-            if (i > 0) {
-                if (formattedData[x.substring(0, i)]) {
-                    formattedData[x.substring(0, i)] += ',' + x.substring(i + 1, x.length - 1)
-                } else {
-                    formattedData[x.substring(0, i)] = x.substring(i + 1, x.length - 1)
+            var sk = x.substring(0, d); // .前面的key
+            var lk = x.substring(d + 1, x.length); // .后面的key
+
+            if(d > 0){
+                if(!fd[sk]) {
+                    fd[sk] = {};
                 }
-            } else {
-                formattedData[x] = data[x]
+                fd[sk][lk] = data[x];
+
+                if(lk.indexOf('.') > 0 || lk.indexOf('[') > 0){
+                    fd[sk] = hsFormat(fd[sk]);
+                }
+
+            }else if(d < 0 && i > 0){
+                if (fd[x.substring(0, i)]) {
+                    fd[x.substring(0, i)] += ',' + x.substring(i + 1, x.length - 1)
+                } else {
+                    fd[x.substring(0, i)] = x.substring(i + 1, x.length - 1)
+                }
+            }else {
+                fd[x] = data[x]
             }
         }
-        return formattedData;
+        return fd;
     }
 
     function openForm(template, callback) {
