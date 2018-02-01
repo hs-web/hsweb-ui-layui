@@ -27,10 +27,9 @@ layui.use([ "element", "form","request","hsForm"], function () {
     var form = layui.form;
     var r = layui.request;
 
-    layui.hsForm.init('#d1');
-    layui.hsForm.init('#d2');
 
     //监听测试
+    layui.hsForm.init();
     form.on('submit(test1)', function (data) {
         console.log(layui.hsForm.format(data.field));
 
