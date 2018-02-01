@@ -1,4 +1,5 @@
-window.API_BASE_PATH = "http://localhost:8080/";
+window.API_BASE_PATH = "http://localhost:8089/";
+window.RESOURCE_PATH = "http://localhost:63342/hsweb-ui-layui/";
 
 var lastAjax = '';
 function doLogin(callback) {
@@ -19,6 +20,7 @@ layui.config({
     hsForm: 'components/hsForm',
     // 页面
     menuManage: 'pages/menuManage',
+    userManage: 'pages/user/userManage'
 });
 
 layui.use([ "element", "form","request","hsForm"], function () {

@@ -210,7 +210,7 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
     function openForm(template, callback) {
         var formId = "f" + new Date().getTime();
         var html = [
-            "<form class='layui-form layui-form-pane' onsubmit='return false' action=''>",
+            "<form id='"+formId+"' class='layui-form layui-form-pane' onsubmit='return false' action=''>",
             "<div class='layui-row'>",
             template.html,
             "</div>",
@@ -220,7 +220,7 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
             "</div>",
             "</form>"
         ];
-        layer.open({
+        var index = layer.open({
             type: 1,
             title: "选项卡配置",
             // skin: 'layui-layer-rim', //加上边框
@@ -233,7 +233,9 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
         });
         form.render();
         element.render();
-        $(".date-picker").each(function () {
+        $("#"+formId+" .date-picker").each(function () {
+            $(this).removeClass(".date-picker")
+                .removeAttr("lay-key");
             var fmt = $(this).attr("format");
             fmt = fmt || 'yyyy-MM-dd';
             layui.laydate.render({
@@ -242,9 +244,11 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
             });
         });
         form.on('submit(' + formId + ')', function (data) {
-            console.log(hsFormat(data.field));
             try {
-                callback(data);
+                if(callback(data.field)){
+                    layer.close(index);
+                    $("#formId").remove();
+                }
             } catch (e) {
                 console.error(e);
             }
