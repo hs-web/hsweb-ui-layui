@@ -25,7 +25,7 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
                     // name        input的name
 
                     var eles = elemForm.find('input[hs-type=hsSelect]');
-                    eles.each(function (index,item) {
+                    eles.each(function (index, item) {
                         var ele = $(item);
 
                         var config = {
@@ -84,7 +84,7 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
 
                     var eles = elemForm.find('input[hs-type=hsSelectTree]');
 
-                    eles.each(function (index,item) {
+                    eles.each(function (index, item) {
                         var ele = $(item);
                         var config = {
                             idKey: 'id',
@@ -116,7 +116,7 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
                                 //拼装
                                 var treeId = Date.now().toString(32);
                                 var treeSelect = $('<div class="hs-tree-select"></div>');
-                                var tree = $('<ul class="ztree layui-anim layui-anim-upbit"></ul>').attr('id',treeId).on('click',function () {
+                                var tree = $('<ul class="ztree layui-anim layui-anim-upbit"></ul>').attr('id', treeId).on('click', function () {
                                     return false;
                                 });
                                 var input = $('<input type="text" placeholder="请选择" readonly class="layui-input">');
@@ -168,9 +168,9 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
 
                                 treeObj.expandAll(true);
 
-                                function zTreeOnClick(event,treeId, treeNode) {
+                                function zTreeOnClick(event, treeId, treeNode) {
                                     console.log(treeId);
-                                    var title = $('#'+treeId).siblings('.hs-select-title');
+                                    var title = $('#' + treeId).siblings('.hs-select-title');
                                     title.find('.layui-input').val(treeNode.name);
                                     title.find('.input-hidden').val(treeNode.id);
                                     title.parent().removeClass('expanded');
@@ -198,23 +198,23 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
             var sk = x.substring(0, d); // .前面的key
             var lk = x.substring(d + 1, x.length); // .后面的key
 
-            if(d > 0){
-                if(!fd[sk]) {
+            if (d > 0) {
+                if (!fd[sk]) {
                     fd[sk] = {};
                 }
                 fd[sk][lk] = data[x];
 
-                if(lk.indexOf('.') > 0 || lk.indexOf('[') > 0){
+                if (lk.indexOf('.') > 0 || lk.indexOf('[') > 0) {
                     fd[sk] = hsFormat(fd[sk]);
                 }
 
-            }else if(d < 0 && i > 0){
+            } else if (d < 0 && i > 0) {
                 if (fd[x.substring(0, i)]) {
                     fd[x.substring(0, i)] += ',' + x.substring(i + 1, x.length - 1)
                 } else {
                     fd[x.substring(0, i)] = x.substring(i + 1, x.length - 1)
                 }
-            }else {
+            } else {
                 fd[x] = data[x]
             }
         }
@@ -224,7 +224,7 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
     function openForm(template, callback) {
         var formId = "f" + new Date().getTime();
         var html = [
-            "<form id='"+formId+"' class='layui-form layui-form-pane' onsubmit='return false' action=''>",
+            "<form id='" + formId + "' class='layui-form layui-form-pane' onsubmit='return false' action=''>",
             "<div class='layui-row'>",
             template.html,
             "</div>",
@@ -245,9 +245,10 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
                 return true;
             }
         });
+
         form.render();
         element.render();
-        $("#"+formId+" .date-picker").each(function () {
+        $("#" + formId + " .date-picker").each(function () {
             $(this).removeClass(".date-picker")
                 .removeAttr("lay-key");
             var fmt = $(this).attr("format");
@@ -259,7 +260,7 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
         });
         form.on('submit(' + formId + ')', function (data) {
             try {
-                if(callback(data.field)){
+                if (callback(data.field)) {
                     layer.close(index);
                     $("#formId").remove();
                 }
@@ -270,10 +271,45 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
         });
     }
 
+    //回填数据
+    function backfillForm(formEle, data) {
+        var items = {
+            normal: function () {
+                var ele = $(formEle).find('textarea[name],input[name][type!=checkbox],select[name]');
+                ele.each(function (index, item) {
+                    var itemName = $(item).attr('name');
+                    var itemValue = layui.get(data, itemName);
+                    $(item).attr('type') == 'radio'
+                        ? $('input[name=' + itemName + '][value=' + itemValue + ']').attr('checked', true)
+                        : $(item).val(itemValue);
+                })
+            },
+            checkbox: function () {
+                var ele = $(formEle).find('input[name][type=checkbox]');
+                ele.each(function (index, item) {
+                    var itemName = $(item).attr('name');
+                    var i = itemName.indexOf('[');
+                    var itemValue = layui.get(data, itemName.substring(0,i));
+                    itemValue.split(',').forEach(function (value) {
+                        if(value == itemName.substring(i + 1, itemName.length - 1)){
+                            $(item).attr('checked',true);
+                        }
+                    })
+                })
+            }
+        };
+
+        layui.each(items, function (index, item) {
+            item();
+        });
+    }
+
+
     var e = {
         init: init,
         format: hsFormat,
-        openForm: openForm
+        openForm: openForm,
+        backfill: backfillForm,
     };
 
     exports("hsForm", e);

@@ -1,4 +1,4 @@
-window.API_BASE_PATH = "http://localhost:8089/";
+window.API_BASE_PATH = "http://localhost:8080/";
 window.RESOURCE_PATH = "http://localhost:63342/hsweb-ui-layui/";
 
 var lastAjax = '';
