@@ -408,7 +408,7 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
 
         if (options.url) { //Ajax请求
             var params = {};
-            params[request.pageName] = curr-1;
+            params[request.pageName] = curr - 1;
             params[request.limitName] = options.limit;
 
             $(options.sorts).each(function (i, e) {
@@ -648,7 +648,7 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
     //数据排序
     Class.prototype.sort = function (th, type, pull, formEvent) {
         var that = this
-            , field=null
+            , field = null
             , res = {}
             , options = that.config
             , filter = options.elem.attr('lay-filter')
@@ -669,6 +669,7 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
         }
 
         field = field || th.data('field');
+
         function getSort(name) {
             if (!sorts) return null;
             for (var i = 0; i < sorts.length; i++) {
@@ -727,7 +728,7 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
 
         //增加后台排序
         if (options.ajaxSort === true) {
-            that.pullData();
+            that.pullData(options.page.curr);
             //thisData = data;
             return;
         } else {
@@ -837,7 +838,7 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
 
         //tbody区域高度
         bodyHeight = parseFloat(height) - parseFloat(that.layHeader.height()) - 1;
-        if(that.layHeader.height() <0 ) {
+        if (that.layHeader.height() < 0) {
             bodyHeight = parseFloat(height) - 39;
         }
         if (options.toolbar) {
@@ -1093,9 +1094,18 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
 
             //显示编辑表单
             if (editType) {
-                if (editType === 'select') { //选择框
-                    //var select = $('<select class="'+ ELEM_EDIT +'" lay-ignore><option></option></select>');
-                    //othis.find('.'+ELEM_EDIT)[0] || othis.append(select);
+                if (typeof editType === 'object') {
+                    othis.find('.' + ELEM_EDIT)[0] || othis.append(editType.templet);
+                } else if (typeof editType === 'function') {
+                    editType({
+                        cellEl: elemCell,
+                        rowEl: othis,
+                        field: field
+                    });
+                }
+                else if (editType === 'select') { //选择框
+                    var select = $('<select class="' + ELEM_EDIT + '" lay-ignore><option></option></select>');
+                    othis.find('.' + ELEM_EDIT)[0] || othis.append(select);
                 } else { //输入框
                     var input = $('<input class="layui-input ' + ELEM_EDIT + '">');
                     input[0].value = othis.data('content') || elemCell.text();

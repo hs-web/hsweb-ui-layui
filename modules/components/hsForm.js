@@ -221,7 +221,11 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
         return fd;
     }
 
-    function openForm(template, callback) {
+    function openForm(config) {
+        var template = config.template,
+            callback = config.onSubmit,
+            onOpen = config.onOpen;
+
         var formId = "f" + new Date().getTime();
         var html = [
             "<form id='" + formId + "' class='layui-form layui-form-pane' onsubmit='return false' action=''>",
@@ -245,7 +249,9 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
                 return true;
             }
         });
-
+        if (config.data) {
+            backfillForm($("#" + formId), config.data);
+        }
         form.render();
         element.render();
         $("#" + formId + " .date-picker").each(function () {
@@ -260,7 +266,7 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
         });
         form.on('submit(' + formId + ')', function (data) {
             try {
-                if (callback(data.field)) {
+                if (callback && callback(data.field)) {
                     layer.close(index);
                     $("#formId").remove();
                 }
@@ -269,6 +275,10 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
             }
             return false;
         });
+
+        if (onOpen) {
+            onOpen($("#" + formId));
+        }
     }
 
     //回填数据
@@ -289,10 +299,10 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
                 ele.each(function (index, item) {
                     var itemName = $(item).attr('name');
                     var i = itemName.indexOf('[');
-                    var itemValue = layui.get(data, itemName.substring(0,i));
+                    var itemValue = layui.get(data, itemName.substring(0, i));
                     itemValue.split(',').forEach(function (value) {
-                        if(value == itemName.substring(i + 1, itemName.length - 1)){
-                            $(item).attr('checked',true);
+                        if (value == itemName.substring(i + 1, itemName.length - 1)) {
+                            $(item).attr('checked', true);
                         }
                     })
                 })

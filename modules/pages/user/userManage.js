@@ -8,14 +8,16 @@ layui.define(["request", "hsForm", "hsTable"], function (exports) {
     });
 
     function init(containerId) {
-        hsTable.init("user-table" + new Date().getTime(), containerId, "user", [[
+        var id = "table" + new Date().getTime();
+
+        hsTable.init(id, containerId, "user", [[
             {field: 'username', title: "用户名", sort: true},
             {field: 'name', title: "姓名"},
             {
                 field: 'status', title: "状态", sort: true, templet: "<script type='text/html'><input type=\"checkbox\" {{d.status===1?'checked':''}} name=\"status\" title=\"有效\" /></script>"
             },
             {
-            type: "toolbar", title: "操作", toolbar: "<script type='text/html'>" +
+                title: "操作", toolbar: "<script type='text/html'>" +
             "<button lay-event=\"edit\" class='layui-btn layui-btn-sm'><i class=\"layui-icon\">&#xe642;</i>编辑</button>" +
             "<button lay-event=\"edit_permission\" class='layui-btn layui-btn-normal layui-btn-sm'>" +
             "<i class=\"layui-icon\">&#xe614;</i> 设置权限</button>" +
@@ -26,9 +28,12 @@ layui.define(["request", "hsForm", "hsTable"], function (exports) {
                 name: '新建',
                 class: '',
                 callback: function () {
-                    hsForm.openForm(template, function (form) {
-                        console.log(form);
-                        return true;
+                    hsForm.openForm({
+                        template: template,
+                        onSubmit: function (form) {
+                            console.log(form);
+                            return true;
+                        }
                     });
                 }
             }],
@@ -42,7 +47,24 @@ layui.define(["request", "hsForm", "hsTable"], function (exports) {
                 type: 'input'
             }]
         });
-
+        var defPWD = Math.random();
+        layui.table.on("tool(" + containerId + ")", function (e) {
+            var data = e.data;
+            var layEvent = e.event;
+            if(layEvent==='edit'){
+                data.password =defPWD;
+                data.status="1";
+                hsForm.openForm({
+                    template: template,
+                    data:data,
+                    onSubmit: function (form) {
+                        console.log(form);
+                        return true;
+                    }
+                });
+            }
+            console.log(e);
+        })
     }
 
     exports("userManage", {

@@ -4,7 +4,7 @@ layui.define(["hsTable"],function (exports) {
     exports("menuManage",{
         init:function (containerId) {
             hsTable.init("user-table"+new Date().getTime(),containerId,"menu",[[
-                {field:'name',title:"菜单名称",sort:true},
+                {field:'name',edit:"text",title:"菜单名称",sort:true},
                 {field:'id',title:"ID",sort:true},
                 {field:'url',title:"URL",sort:true},
                 {field:'permissionId',title:"权限ID",sort:true},

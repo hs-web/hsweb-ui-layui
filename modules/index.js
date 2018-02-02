@@ -1,4 +1,4 @@
-window.API_BASE_PATH = "http://localhost:8080/";
+window.API_BASE_PATH = "http://localhost:8089/";
 window.RESOURCE_PATH = "http://localhost:63342/hsweb-ui-layui/";
 
 var lastAjax = '';
@@ -111,7 +111,9 @@ layui.use([ "element", "form","request","hsForm"], function () {
         if ($("[lay-id=" + menu.id + "]").length === 0) {
             layui.element.tabAdd('tabs', {
                 title: menu.name
-                , content: '<div id="tools-' + menu.id + '"></div><div id="container-' + menu.id + '"></div>'
+                , content: '<div id="tools-' + menu.id + '"></div>' +
+                '<div lay-filter="'+menu.id+'" id="container-' + menu.id + '">' +
+                '</div>'
                 , id: menu.id
             });
             layui.use(menu.url, function () {
