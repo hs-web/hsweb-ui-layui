@@ -82,13 +82,18 @@ function initRequireJs() {
             }
         },
         shim: {
-            'jquery': {exports: "$"}
+            'jquery': {exports: "$"},
+            'layui': {exports: "layui"}
         },
         paths: {
             "jquery": [RESOURCE_PATH + "plugins/jquery-ui/jquery"],
             "authorize": [RESOURCE_PATH + "admin/commons/authorize"], //权限管理
             "plugin": [RESOURCE_PATH + "plugins"],
-            "module": [RESOURCE_PATH + "modules"]
+            "module": [RESOURCE_PATH + "modules"],
+            "request": [RESOURCE_PATH + "modules/request"],
+            "pages": [RESOURCE_PATH + "pages"],
+            "hsForm": [RESOURCE_PATH + "modules/components/hs-form"],
+            "hsTable": [RESOURCE_PATH + "modules/components/hs-table"]
         }
     });
 }
@@ -112,15 +117,19 @@ function importLayui(callback) {
                     , version: false
                     , debug: false
                     , base: RESOURCE_PATH + 'modules/'
-                }).extend({
-                    //模块
-                    hsTable: 'components/hsTable',
-                    hsForm: 'components/hsForm',
-                    // 页面
-                    menuManage: 'pages/menuManage',
-                    userManage: 'pages/user/userManage'
                 });
-                callback();
+                layui.use(["table","element","form","layer","laydate"],function () {
+                    callback();
+                });
+                //     .extend({
+                //     //模块
+                //     hsTable: 'components/hsTable',
+                //     hsForm: 'components/hsForm',
+                //     // 页面
+                //     menuManage: 'pages/menuManage',
+                //     userManage: 'pages/user/userManage'
+                // });
+
             });
         }
 

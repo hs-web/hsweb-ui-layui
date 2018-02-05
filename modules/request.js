@@ -1,5 +1,4 @@
-layui.define(["jquery"], function (exports) {
-    var $ = layui.jquery;
+define(["jquery"], function ($) {
     //fix #113 ie8不能使用patch方法的bug
     if (window.ActiveXObject) {
         $.ajaxPrefilter(function (options) {
@@ -14,6 +13,7 @@ layui.define(["jquery"], function (exports) {
     $.ajaxSetup({ //设置全局性的Ajax选项
         beforeSend: function (r) {
             var token = layui.sessionData("hsweb-token");
+            console.log(token);
             if (token) {
                 token = token.accessToken;
             }
@@ -320,5 +320,5 @@ layui.define(["jquery"], function (exports) {
         }, doAjax: doAjax
     };
 
-    exports("request", e);
+   return e;
 });

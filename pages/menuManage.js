@@ -22,7 +22,7 @@ layui.define(["hsTable"],function (exports) {
                 search: [{
                     label: '菜单名称',
                     column: 'name',
-                    type: 'input',
+                    type: 'input'
                 },{
                     label: '菜单ID',
                     column: 'id',
@@ -40,7 +40,7 @@ layui.define(["hsTable"],function (exports) {
                 },{
                     label: 'URL',
                     column: 'url',
-                    type: 'input',
+                    type: 'input'
                 }]
             });
         }

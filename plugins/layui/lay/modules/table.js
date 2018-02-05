@@ -415,29 +415,51 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
                 params["sorts[" + i + "].name"] = e.name;
                 params["sorts[" + i + "].order"] = e.order;
             });
-            $.ajax({
-                type: options.method || 'get'
-                , url: options.url
-                , data: $.extend(params, options.where)
-                , dataType: 'json'
-                , success: function (res) {
-                    if (layui.get(res, response.statusName) !== response.statusCode) {
+            if (options.ajax) {
+                options.ajax(params,{
+                    success: function (res) {
+                        console.log(res);
+                        if (layui.get(res, response.statusName) !== response.statusCode) {
+                            that.renderForm();
+                            return that.layMain.html('<div class="' + NONE + '">' + (layui.get(res, response.msgName) || '返回的数据状态异常') + '</div>');
+                        }
+                        that.renderData(res, curr, layui.get(res, response.countName));
+                        if (!options.ajaxSort)
+                            sort();
+                        options.time = (new Date().getTime() - that.startTime) + ' ms'; //耗时（接口请求+视图渲染）
+                        loadIndex && layer.close(loadIndex);
+                        typeof options.done === 'function' && options.done(res, curr, layui.get(res, response.countName));
+                    }, error: function (e, m) {
+                        that.layMain.html('<div class="' + NONE + '">数据接口请求异常</div>');
                         that.renderForm();
-                        return that.layMain.html('<div class="' + NONE + '">' + (layui.get(res, response.msgName) || '返回的数据状态异常') + '</div>');
+                        loadIndex && layer.close(loadIndex);
                     }
-                    that.renderData(res, curr, layui.get(res, response.countName));
-                    if (!options.ajaxSort)
-                        sort();
-                    options.time = (new Date().getTime() - that.startTime) + ' ms'; //耗时（接口请求+视图渲染）
-                    loadIndex && layer.close(loadIndex);
-                    typeof options.done === 'function' && options.done(res, curr, layui.get(res, response.countName));
-                }
-                , error: function (e, m) {
-                    that.layMain.html('<div class="' + NONE + '">数据接口请求异常</div>');
-                    that.renderForm();
-                    loadIndex && layer.close(loadIndex);
-                }
-            });
+                })
+            } else {
+                $.ajax({
+                    type: options.method || 'get'
+                    , url: options.url
+                    , data: $.extend(params, options.where)
+                    , dataType: 'json'
+                    , success: function (res) {
+                        if (layui.get(res, response.statusName) !== response.statusCode) {
+                            that.renderForm();
+                            return that.layMain.html('<div class="' + NONE + '">' + (layui.get(res, response.msgName) || '返回的数据状态异常') + '</div>');
+                        }
+                        that.renderData(res, curr, layui.get(res, response.countName));
+                        if (!options.ajaxSort)
+                            sort();
+                        options.time = (new Date().getTime() - that.startTime) + ' ms'; //耗时（接口请求+视图渲染）
+                        loadIndex && layer.close(loadIndex);
+                        typeof options.done === 'function' && options.done(res, curr, layui.get(res, response.countName));
+                    }
+                    , error: function (e, m) {
+                        that.layMain.html('<div class="' + NONE + '">数据接口请求异常</div>');
+                        that.renderForm();
+                        loadIndex && layer.close(loadIndex);
+                    }
+                });
+            }
         } else if (options.data && options.data.constructor === Array) { //已知数据
             var res = {}
                 , startLimit = curr * options.limit - options.limit

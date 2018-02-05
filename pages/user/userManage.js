@@ -1,11 +1,17 @@
-layui.define(["request", "hsForm", "hsTable"], function (exports) {
-    var request = layui.request;
-    var hsForm = layui.hsForm;
-    var hsTable = layui.hsTable;
-    var template;
-    request.get(window.RESOURCE_PATH + "modules/pages/user/save.hf", function (json) {
-        template = json;
-    });
+define([ "request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
+
+    function openSaveWindow(data) {
+        require(["text!pages/user/save.hf"], function (templateJSON) {
+            hsForm.openForm({
+                template: JSON.parse(templateJSON),
+                data: data,
+                onSubmit: function (form) {
+                    console.log(form);
+                    return true;
+                }
+            });
+        })
+    }
 
     function init(containerId) {
         var id = "table" + new Date().getTime();
@@ -28,13 +34,7 @@ layui.define(["request", "hsForm", "hsTable"], function (exports) {
                 name: '新建',
                 class: '',
                 callback: function () {
-                    hsForm.openForm({
-                        template: template,
-                        onSubmit: function (form) {
-                            console.log(form);
-                            return true;
-                        }
-                    });
+                    openSaveWindow();
                 }
             }],
             search: [{
@@ -51,23 +51,14 @@ layui.define(["request", "hsForm", "hsTable"], function (exports) {
         layui.table.on("tool(" + containerId + ")", function (e) {
             var data = e.data;
             var layEvent = e.event;
-            if(layEvent==='edit'){
-                data.password =defPWD;
-                data.status="1";
-                hsForm.openForm({
-                    template: template,
-                    data:data,
-                    onSubmit: function (form) {
-                        console.log(form);
-                        return true;
-                    }
-                });
+            if (layEvent === 'edit') {
+                data.password = defPWD;
+                data.status = "1";
+                openSaveWindow(data);
             }
             console.log(e);
         })
     }
 
-    exports("userManage", {
-        init: init
-    })
+    return {init:init}
 });
