@@ -1,4 +1,4 @@
-define(["jquery"], function ($) {
+define(["jquery","request"], function ($,request) {
     var element = layui.element,
         form = layui.form,
         layer = layui.layer,
@@ -122,6 +122,14 @@ define(["jquery"], function ($) {
                                 var input = $('<input type="text" placeholder="请选择" readonly class="layui-input">');
                                 var inputHide = $('<input type="text" readonly class="input-hidden" style="display: none;">').attr('name', opt.name);
                                 var title = $('<div class="hs-select-title"></div>').append(input).append(inputHide).append($('<i class="layui-edge"></i>'));
+
+                                opt.options.forEach(function (item) {
+                                    if (opt.selected && opt.selected == item.id) {
+                                        input.val(item.name);
+                                        inputHide.val(item.id);
+                                    }
+                                });
+
                                 treeSelect.append(title);
                                 treeSelect.append(tree);
 
@@ -148,34 +156,38 @@ define(["jquery"], function ($) {
 
                                 $(document).off('click', hideDown).on('click', hideDown);
 
-                                //ztree
-                                var setting = {
-                                    view: {
-                                        selectedMulti: false,
-                                        dblClickExpand: false
-                                    },
-                                    data: {
-                                        simpleData: {
-                                            enable: true
+                                require(['plugin/ztree/jquery.ztree.all','css!plugin/font-awesome/css/font-awesome','css!plugin/ztree/awesomeStyle/awesome'],function (zTree) {
+                                    //ztree
+                                    var setting = {
+                                        view: {
+                                            selectedMulti: false,
+                                            dblClickExpand: false
+                                        },
+                                        data: {
+                                            simpleData: {
+                                                enable: true
+                                            }
+                                        },
+                                        callback: {
+                                            onClick: zTreeOnClick
                                         }
-                                    },
-                                    callback: {
-                                        onClick: zTreeOnClick
-                                    }
-                                };
+                                    };
 
-                                var treeObj = $.fn.zTree.init(tree, setting, opt.options);
+                                    var treeObj = $.fn.zTree.init(tree, setting, opt.options);
 
-                                treeObj.expandAll(true);
+                                    opt.selected && treeObj.selectNode(treeObj.getNodeByParam("id", opt.selected));
 
-                                function zTreeOnClick(event, treeId, treeNode) {
-                                    console.log(treeId);
-                                    var title = $('#' + treeId).siblings('.hs-select-title');
-                                    title.find('.layui-input').val(treeNode.name);
-                                    title.find('.input-hidden').val(treeNode.id);
-                                    title.parent().removeClass('expanded');
-                                };
+                                    treeObj.expandAll(true);
 
+                                    function zTreeOnClick(event, treeId, treeNode) {
+                                        console.log(treeId);
+                                        var title = $('#' + treeId).siblings('.hs-select-title');
+                                        title.find('.layui-input').val(treeNode.name);
+                                        title.find('.input-hidden').val(treeNode.id);
+                                        title.parent().removeClass('expanded');
+                                    };
+
+                                })
                             }
                         });
                     });
@@ -253,6 +265,7 @@ define(["jquery"], function ($) {
             backfillForm($("#" + formId), config.data);
         }
         form.render();
+        init();
         element.render();
         $("#" + formId + " .date-picker").each(function () {
             $(this).removeClass(".date-picker")
@@ -306,7 +319,23 @@ define(["jquery"], function ($) {
                         }
                     })
                 })
-            }
+            },
+            hsSelect: function () {
+                var ele = $(formEle).find('input[hs-name][hs-type=hsSelect]');
+                ele.each(function (index, item) {
+                    var itemName = $(item).attr('hs-name');
+                    var itemValue = layui.get(data, itemName);
+                    $(item).attr('hs-selected',itemValue);
+                })
+            },
+            hsSelectTree: function () {
+                var ele = $(formEle).find('input[hs-name][hs-type=hsSelectTree]');
+                ele.each(function (index, item) {
+                    var itemName = $(item).attr('hs-name');
+                    var itemValue = layui.get(data, itemName);
+                    $(item).attr('hs-selected',itemValue);
+                })
+            },
         };
 
         layui.each(items, function (index, item) {

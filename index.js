@@ -1,6 +1,5 @@
-require(["css!plugin/css/custom"]);
-
 importLayui(function () {
+    require(["css!plugin/css/custom"]);
     var lastAjax = '';
     window.doLogin = function (callback) {
         $('.loading-wrap').hide();
