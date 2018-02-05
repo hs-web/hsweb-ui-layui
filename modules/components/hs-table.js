@@ -2,7 +2,68 @@ define(["hsForm"], function (hsForm) {
     var element = layui.element,
         request = layui.request,
         form = layui.form,
+        laydate = layui.laydate,
         table = layui.table;
+
+    //渲染搜索框的方法
+    var renderForm = {
+        input: function (item) {
+            var formInput = $('<input type="text" class="layui-input">').attr('name', item.column);
+            return formInput;
+        },
+        select: function (item) {
+            var formInput = $('<select></select>').attr('name', item.column);
+            formInput.append($('<option></option>'));
+            item.options.forEach(function (opt) {
+                formInput.append($('<option></option>').text(opt.text).attr('value', opt.value))
+            });
+            return formInput;
+        },
+        radio: function (item) {
+            var formInput = $('<div>');
+            item.options.forEach(function (opt) {
+                formInput.append($('<input type="radio">').attr('title',opt.text).attr('value', opt.value).attr('name',item.column))
+            });
+            return formInput;
+        },
+        checkbox: function (item) {
+            var formInput = $('<div>');
+            item.options.forEach(function (opt) {
+                formInput.append($('<input type="checkbox">').attr('title',opt.text).attr('name',item.column+'['+opt.value+']'))
+            });
+            return formInput;
+        },
+        switch: function (item) {
+            var formInput = $('<input type="checkbox" lay-skin="switch">').attr('name',item.column).attr('lay-text',item.text);
+            return formInput;
+        },
+        date: function (item) {
+            var formInput = $('<input type="text" class="layui-input">').attr('name',item.column);
+            return formInput;
+        },
+        hsSelect: function (item) {
+            var formInput = $('<input hs-type="hsSelect">')
+                .attr('hs-value',item.value)
+                .attr('hs-text',item.text)
+                .attr('hs-data',item.data)
+                .attr('hs-name',item.column)
+                .attr('hs-url',item.url)
+                .attr('hs-selected',item.selected);
+            return formInput;
+        },
+        hsSelectTree: function (item) {
+            var formInput = $('<input hs-type="hsSelectTree">')
+                .attr('hs-value',item.value)
+                .attr('hs-idKey',item.idKey)
+                .attr('hs-pIdKey',item.pIdKey)
+                .attr('hs-nameKey',item.nameKey)
+                .attr('hs-data',item.data)
+                .attr('hs-name',item.column)
+                .attr('hs-url',item.url)
+                .attr('hs-selected',item.selected);
+            return formInput;
+        },
+    }
 
     function init(id, containerId, url, cols, tools) {
         //查询
@@ -24,23 +85,22 @@ define(["hsForm"], function (hsForm) {
                 var formLabel = $('<label class="layui-form-label"></label>').text(item.label);
                 var formInputWrap = $('<div class="layui-input-block"></div>');
 
-                // 输入框
-                if (item.type == 'input') {
-                    var formInput = $('<input type="text" class="layui-input">').attr('name', item.column);
-                } else if (item.type == 'select') {
-                    var formInput = $('<select></select>').attr('name', item.column);
-                    formInput.append($('<option></option>'));
-                    item.options.forEach(function (opt) {
-                        formInput.append($('<option></option>').text(opt.text).attr('value', opt.value))
-                    });
-                }
+                //渲染搜索框
+                var formInput = renderForm[item.type](item);
+
                 formInputWrap.append(formInput);
                 formItem.append(formLabel).append(formInputWrap);
                 wrap.append(formItem);
+
+                if(item.type == 'date'){
+                    var param = $.extend({},{elem:formInput[0]},item.options);
+                    laydate.render(param);
+                }
             });
             wrap.append($('<div class="layui-col-lg3 custom-form-item" style="text-align: right"></div>').append(btnSearch).append(btnClear));
             $('#tools-' + containerId).append(wrap);
 
+            hsForm.init();
             form.render();
         }
         //工具栏

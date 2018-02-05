@@ -45,6 +45,50 @@ define([ "request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
                 label: '姓名',
                 column: 'name',
                 type: 'input'
+            }, {
+                label: '性别',
+                column: 'gender',
+                type: 'radio',
+                options: [{
+                    value: 'man',
+                    text: '男',
+                },{
+                    value: 'woman',
+                    text: '女',
+                }]
+            }, {
+                label: '复选框',
+                column: 'checkcheck',
+                type: 'checkbox',
+                options: [{
+                    value: 'man',
+                    text: '男',
+                },{
+                    value: 'woman',
+                    text: '女',
+                }]
+            }, {
+                label: '开关',
+                column: 'switchswitch',
+                type: 'switch',
+                // text: '开启|关闭',
+            }, {
+                label: '日期',
+                column: 'switchswitch',
+                type: 'date',
+                options: {
+                    type: 'year'
+                }
+            }, {
+                label: 'hsSelect',
+                column: 'hs1',
+                type: 'hsSelect',
+                url: 'menu',
+            }, {
+                label: 'hsSelectTree',
+                column: 'hs2',
+                type: 'hsSelectTree',
+                url: 'menu',
             }]
         });
         var defPWD = Math.random();
