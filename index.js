@@ -25,6 +25,7 @@ importLayui(function () {
         footer: false
     };
     loadUserTree();
+
     function loadUserTree() {
         require(["request"], function (r) {
             r.get("menu/user-own/tree", function (e) {
@@ -33,6 +34,7 @@ importLayui(function () {
                     element.init();
                     $($("#top-menu").find("a")[0]).click();
                     $('.loading-wrap').hide();
+                    $(".main").fadeIn(200)
                 }
             });
         })
@@ -40,7 +42,7 @@ importLayui(function () {
 
     //监听登录
     form.on('submit(loginForm)', function (data) {
-        require(["request"],function (r) {
+        require(["request"], function (r) {
             try {
                 r.post("authorize/login", {username: data.field.username, password: data.field.password, token_type: "jwt"}, function (e) {
                     if (e.status === 200) {
@@ -104,7 +106,7 @@ importLayui(function () {
                 '</div>'
                 , id: menu.id
             });
-            require(["pages/user/userManage"], function (page) {
+            require([menu.url], function (page) {
                 page.init(menu.id);
             });
         }
@@ -145,4 +147,5 @@ importLayui(function () {
         $('.layui-footer').hide();
         $('.layui-body').css('bottom', '0');
     }
+
 });

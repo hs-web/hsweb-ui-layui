@@ -1,6 +1,5 @@
-define(["hsForm"], function (hsForm) {
+define(["hsForm","request"], function (hsForm,request) {
     var element = layui.element,
-        request = layui.request,
         form = layui.form,
         laydate = layui.laydate,
         table = layui.table;
@@ -124,13 +123,11 @@ define(["hsForm"], function (hsForm) {
             cols: cols,
             ajaxSort: true,
             ajax: function (param, call) {
-                require(["request"], function (request) {
-                    request.get(url, param, function (res) {
-                        if (res.status === 200) {
-                            call.success(res);
-                        }
-                    })
-                });
+                request.get(url, param, function (res) {
+                    if (res.status === 200) {
+                        call.success(res);
+                    }
+                })
             },
             // height: 'full-210',
             //where: {token: 'sasasas', id: 123} //如果无需传递额外参数，可不加该参数
@@ -140,8 +137,9 @@ define(["hsForm"], function (hsForm) {
                 , limitName: 'pageSize' //每页数据量的参数名，默认：limit
             },
             page: {
-                curr: 1,
+                curr: 1
             },
+            limit:10,
             sorts: sorts,
             response: {
                 statusName: 'status' //数据状态的字段名称，默认：code
@@ -161,7 +159,7 @@ define(["hsForm"], function (hsForm) {
                         column: k,
                         value: '%' + i + '%',
                         type: 'and',
-                        termType: 'like',
+                        termType: 'like'
                     })
                 }
             });
@@ -175,7 +173,7 @@ define(["hsForm"], function (hsForm) {
             return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
         });
 
-        return table;
+        return tableInit;
     }
 
     //格式化terms

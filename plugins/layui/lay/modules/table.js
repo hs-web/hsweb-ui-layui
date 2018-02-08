@@ -48,8 +48,8 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
             id && (thisTable.config[id] = options);
 
             return {
-                reload: function (options) {
-                    that.reload.call(that, options);
+                reload: function (options, noRender) {
+                    that.reload.call(that, options, noRender);
                 }
                 , config: options
             }
@@ -383,15 +383,18 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
     };
 
     //表格重载
-    Class.prototype.reload = function (options) {
+    Class.prototype.reload = function (options, noRender) {
         var that = this;
         that.config = $.extend({}, that.config, options);
-        that.render();
+        if (noRender) {
+            that.pullData(that.config.curr ? that.config.curr : 1);
+        } else {
+            that.render();
+        }
     };
 
     //页码
     Class.prototype.page = 1;
-
     //获得数据
     Class.prototype.pullData = function (curr, loadIndex) {
         var that = this
@@ -416,9 +419,8 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
                 params["sorts[" + i + "].order"] = e.order;
             });
             if (options.ajax) {
-                options.ajax(params,{
+                options.ajax($.extend(params, options.where), {
                     success: function (res) {
-                        console.log(res);
                         if (layui.get(res, response.statusName) !== response.statusCode) {
                             that.renderForm();
                             return that.layMain.html('<div class="' + NONE + '">' + (layui.get(res, response.msgName) || '返回的数据状态异常') + '</div>');

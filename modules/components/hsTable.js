@@ -73,7 +73,7 @@ layui.define(["jquery", "element", "request", "form", "table","laytpl","hsForm"]
                 , limitName: 'pageSize' //每页数据量的参数名，默认：limit
             },
             page: {
-                curr: 1,
+                curr: 1
             },
             sorts: sorts,
             response: {
@@ -108,7 +108,7 @@ layui.define(["jquery", "element", "request", "form", "table","laytpl","hsForm"]
             return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
         });
 
-        return table;
+        return tableInit;
     }
 
     //格式化terms

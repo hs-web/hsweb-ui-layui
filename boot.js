@@ -1,5 +1,7 @@
 window.API_BASE_PATH = "http://localhost:8089/";
 window.RESOURCE_PATH = "/hsweb-ui-layui/";
+
+
 String.prototype.startWith = function (str) {
     var reg = new RegExp("^" + str);
     return reg.test(this);
@@ -86,6 +88,7 @@ function initRequireJs() {
             'layui': {exports: "layui"}
         },
         paths: {
+            "components":[RESOURCE_PATH + "modules/components"],
             "jquery": [RESOURCE_PATH + "plugins/jquery-ui/jquery"],
             "authorize": [RESOURCE_PATH + "admin/commons/authorize"], //权限管理
             "plugin": [RESOURCE_PATH + "plugins"],
@@ -118,18 +121,9 @@ function importLayui(callback) {
                     , debug: false
                     , base: RESOURCE_PATH + 'modules/'
                 });
-                layui.use(["table","element","form","layer","laydate"],function () {
+                layui.use(["table", "element", "form", "layer", "laydate"], function () {
                     callback();
                 });
-                //     .extend({
-                //     //模块
-                //     hsTable: 'components/hsTable',
-                //     hsForm: 'components/hsForm',
-                //     // 页面
-                //     menuManage: 'pages/menuManage',
-                //     userManage: 'pages/user/userManage'
-                // });
-
             });
         }
 
@@ -139,7 +133,6 @@ function importLayui(callback) {
             loadLayui();
         }
     }
-
     doImport();
 }
 

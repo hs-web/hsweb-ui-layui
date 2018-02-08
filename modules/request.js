@@ -13,7 +13,6 @@ define(["jquery"], function ($) {
     $.ajaxSetup({ //设置全局性的Ajax选项
         beforeSend: function (r) {
             var token = layui.sessionData("hsweb-token");
-            console.log(token);
             if (token) {
                 token = token.accessToken;
             }
