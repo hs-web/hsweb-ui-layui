@@ -34,7 +34,6 @@ define(["hsTable", "hsForm"], function (hsTable, hsForm) {
         layui.table.on("tool(" + id + ")", function (e) {
             var data = e.data;
             var layEvent = e.event;
-            console.log(data)
             if (layEvent === 'select') {
                 if (call(data)) {
                     layer.close(layerIndex);

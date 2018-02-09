@@ -1,10 +1,10 @@
 importLayui(function () {
     require(["css!plugin/css/custom"]);
-    var lastAjax = '';
+    var lastAjax = [];
     window.doLogin = function (callback) {
         $('.loading-wrap').hide();
         $('.login-wrap').show();
-        lastAjax = callback;
+        lastAjax.push(callback);
     };
     require(["hsForm"], function (hsForm) {
         hsForm.init();
@@ -48,13 +48,15 @@ importLayui(function () {
                     if (e.status === 200) {
                         layui.sessionData("hsweb-token", {key: "accessToken", value: e.result.token});
                         //使用后清空
-                        lastAjax();
-                        lastAjax = '';
+                        $(lastAjax).each(function () {
+                            this();
+                        });
+                        lastAjax = [];
                         //隐藏login
                         $('.login-wrap').hide();
                         loadUserTree();
                     }
-                    console.log(e);
+                    //    console.log(e);
                 }, false);
             } catch (e) {
                 console.log(e)

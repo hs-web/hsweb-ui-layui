@@ -9,11 +9,11 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
             var dataId = data ? data.id : "";
             require(["text!pages/role/save.hf"], function (templateJSON) {
                 hsForm.openForm({
-                    title:"保存角色信息",
+                    title: "保存角色信息",
                     area: ["800px", "600px"],
                     template: JSON.parse(templateJSON),
                     data: data,
-                    onOpen: function (formEl,ready) {
+                    onOpen: function (formEl, ready) {
                         //表单被打开后调用
                         ready();
                     },
@@ -45,16 +45,16 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
         }
 
         table = hsTable.init(id, containerId, "role", [[
-            {field: 'id', title: "标识", sort: true,width:"20%"},
-            {field: 'name', title: "名称",width:"30%"},
-            {field: 'describe', title: "备注",width:"30%"},
+            {field: 'id', title: "标识", sort: true, width: "20%"},
+            {field: 'name', title: "名称", width: "30%"},
+            {field: 'describe', title: "备注", width: "30%"},
             // {
             //     field: 'status', title: "状态", sort: true,width:"10%", templet: "<script type='text/html'>" +
             // "<input type=\"checkbox\"  lay-skin=\"switch\" value=\"{{d.id}}\" lay-text=\"启用|禁用\" {{d.status===1?'checked':''}} lay-filter=\"role_status\" name=\"status\" title=\"有效\" />" +
             // "</script>"
             // },
             {
-                title: "操作",align:"center", width:"20%",toolbar: "<script type='text/html'>" +
+                title: "操作", align: "center", width: "20%", toolbar: "<script type='text/html'>" +
             "<button lay-event=\"edit\" class='layui-btn layui-btn-sm'><i class=\"layui-icon\">&#xe642;</i>编辑</button>" +
             "<button lay-event=\"edit_permission\" class='layui-btn layui-btn-normal layui-btn-sm'>" +
             "<i class=\"layui-icon\">&#xe614;</i> 设置权限</button>" +
@@ -105,6 +105,10 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
             var layEvent = e.event;
             if (layEvent === 'edit') {
                 edit(data);
+            } else if (layEvent === 'edit_permission') {
+                require(["pages/autz-setting/autz-setting"], function (setting) {
+                    setting("role", data.id)
+                });
             }
         })
     }

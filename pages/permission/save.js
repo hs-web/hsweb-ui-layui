@@ -25,7 +25,7 @@ define(["request"], function (request) {
                 var editor = $("<div class='layui-input-inline'>");
                 var input = $("<input style='width: 100px;margin-left: 10px;margin-right: 10px;' class='layui-input layui-input-inline'>");
                 input.val(actionButton.text());
-                input.css("width", actionButton.width() + 30);
+                input.css("width", actionButton.width() + 35);
                 editor.append(input);
                 // editor.append($("<button class='layui-btn layui-btn-danger'>")
                 //     .text("X").on("click",function () {

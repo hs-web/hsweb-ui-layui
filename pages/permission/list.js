@@ -104,7 +104,6 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
             var state = obj.elem.checked;
             var api = state ? "permission/" + id + "/enable" : "permission/" + id + "/disable";
             request.put(api, {}, function (resp) {
-                console.log(obj);
                 if (resp.status !== 200) {
                     layer.alert("提交失败:" + resp.message);
                 } else {
