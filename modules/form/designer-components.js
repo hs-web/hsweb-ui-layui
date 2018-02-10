@@ -578,25 +578,16 @@
                     createEditor: function (compent, text, value) {
                         var button = $("<button class='layui-btn'>").text("编辑配置");
                         button.on("click", function () {
-                            var value = compent.getProperty("tabs");
-
-                            var table = "<table lay-filter=\"tabs-config-table\">\n" +
-                                "  <thead>\n" +
-                                "    <tr>\n" +
-                                "      <th lay-data=\"{field:'name',edit:'text', width:200}\">选项卡名称</th>\n" +
-                                "      <th lay-data=\"{field:'type',edit:'radio', width:150}\">选项卡类型</th>\n" +
-                                "      <th lay-data=\"{field:'config', minWidth: 180}\">选项卡配置</th>\n" +
-                                "    </tr> \n" +
-                                "  </thead>\n" +
-                                "  <tbody>\n" +
-                                "    <tr>\n" +
-                                "      <td>选项卡1</td>\n" +
-                                "      <td>子表单</td>\n" +
-                                "      <td></td>\n" +
-                                "    </tr>\n" +
-                                "  </tbody>\n" +
-                                "</table>";
-                            var tableObj;
+                            var value = compent.getProperty("tabs").value;
+                            if (typeof value === 'string') {
+                                value = JSON.parse(value);
+                            }
+                            var table = "<div class=\"layui-tab\" lay-filter=\"tabs-config-tabs\" lay-allowclose=\"true\">" +
+                                "<ul class=\"layui-tab-title\">\n" +
+                                "  </ul>\n" +
+                                "  <div class=\"layui-tab-content\">\n" +
+                                "  </div>" +
+                                "</div>";
                             layer.open({
                                 type: 1,
                                 title: "选项卡配置",
@@ -605,13 +596,28 @@
                                 content: table,
                                 btn: "确定",
                                 yes: function () {
-                                    compent.setProperty("tabs", tableObj.cache);
+
+                                    // compent.setProperty("tabs", datas);
+                                    layui.element.render();
                                     return true;
                                 }
                             });
-                            tableObj = layui.table.init('tabs-config-table', { //转化静态表格
-                                //height: 'full-500'
+                            layui.element.render();
+                            layui.element.tabAdd('tabs-config-tabs', {
+                                title: '新选项1'
+                                , content: '内容1'
+                                , id: new Date().getTime()
                             });
+                            layui.element.tabAdd('tabs-config-tabs', {
+                                title: '新选项2'
+                                , content: '内容2'
+                                , id: new Date().getTime()
+                            });
+                            $("[lay-filter=tabs-config-tabs] .layui-tab-title,.layui-tab-content")
+                                .sortable({
+                                    connectWith: "li"
+                                });
+
                         });
                         return button;
                     }
@@ -637,17 +643,17 @@
                 });
 
                 function initTabs() {
-                    var value = me.getProperty("tabs");
+                    var value = me.getProperty("tabs").value;
                     if (value) {
                         if (typeof value === 'string') {
                             value = JSON.parse(value);
                         }
-                        var tab = $(".layui-tab:first");
+                        var tab = container.find(".layui-tab:first");
                         var title = tab.find(".layui-tab-title");
                         var content = tab.find(".layui-tab-content");
-
                         $(value).each(function () {
                             var id = this.id;
+                            console.log(this);
                             title.append($("<li>")
                                 .attr("hs-tab-id", id)
                                 .text(this.name));
@@ -657,7 +663,7 @@
                                     .attr("hs-tab-id", id);
                             }
                             content.append(body);
-                        })
+                        });
                     }
                 }
 

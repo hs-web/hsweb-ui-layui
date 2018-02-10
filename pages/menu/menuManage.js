@@ -4,10 +4,10 @@ layui.define(["hsTable"],function (exports) {
     exports("menuManage",{
         init:function (containerId) {
             hsTable.init("user-table"+new Date().getTime(),containerId,"menu",[[
-                {field:'name',title:"菜单名称",sort:true},
+                {field:'name',edit:"text",title:"菜单名称",sort:true},
                 {field:'id',title:"ID",sort:true},
                 {field:'url',title:"URL",sort:true},
-                {field:'permissionId',title:"权限ID",sort:true},
+                {field:'permissionId',title:"权限ID",sort:true}
             ]],{
                 btns: [{
                     name: '新建',
@@ -17,12 +17,12 @@ layui.define(["hsTable"],function (exports) {
                     }
                 },{
                     name: '删除',
-                    class: 'layui-btn-primary',
+                    class: 'layui-btn-primary'
                 }],
                 search: [{
                     label: '菜单名称',
                     column: 'name',
-                    type: 'input',
+                    type: 'input'
                 },{
                     label: '菜单ID',
                     column: 'id',
@@ -40,7 +40,7 @@ layui.define(["hsTable"],function (exports) {
                 },{
                     label: 'URL',
                     column: 'url',
-                    type: 'input',
+                    type: 'input'
                 }]
             });
         }

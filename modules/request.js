@@ -1,5 +1,4 @@
-layui.define(["jquery"], function (exports) {
-    var $ = layui.jquery;
+define(["jquery"], function ($) {
     //fix #113 ie8不能使用patch方法的bug
     if (window.ActiveXObject) {
         $.ajaxPrefilter(function (options) {
@@ -320,5 +319,5 @@ layui.define(["jquery"], function (exports) {
         }, doAjax: doAjax
     };
 
-    exports("request", e);
+   return e;
 });

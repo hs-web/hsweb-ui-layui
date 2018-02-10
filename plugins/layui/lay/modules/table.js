@@ -48,8 +48,8 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
             id && (thisTable.config[id] = options);
 
             return {
-                reload: function (options) {
-                    that.reload.call(that, options);
+                reload: function (options, noRender) {
+                    that.reload.call(that, options, noRender);
                 }
                 , config: options
             }
@@ -383,15 +383,18 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
     };
 
     //表格重载
-    Class.prototype.reload = function (options) {
+    Class.prototype.reload = function (options, noRender) {
         var that = this;
         that.config = $.extend({}, that.config, options);
-        that.render();
+        if (noRender) {
+            that.pullData(that.config.curr ? that.config.curr : 1);
+        } else {
+            that.render();
+        }
     };
 
     //页码
     Class.prototype.page = 1;
-
     //获得数据
     Class.prototype.pullData = function (curr, loadIndex) {
         var that = this
@@ -408,36 +411,57 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
 
         if (options.url) { //Ajax请求
             var params = {};
-            params[request.pageName] = curr-1;
+            params[request.pageName] = curr - 1;
             params[request.limitName] = options.limit;
 
             $(options.sorts).each(function (i, e) {
                 params["sorts[" + i + "].name"] = e.name;
                 params["sorts[" + i + "].order"] = e.order;
             });
-            $.ajax({
-                type: options.method || 'get'
-                , url: options.url
-                , data: $.extend(params, options.where)
-                , dataType: 'json'
-                , success: function (res) {
-                    if (layui.get(res, response.statusName) !== response.statusCode) {
+            if (options.ajax) {
+                options.ajax($.extend(params, options.where), {
+                    success: function (res) {
+                        if (layui.get(res, response.statusName) !== response.statusCode) {
+                            that.renderForm();
+                            return that.layMain.html('<div class="' + NONE + '">' + (layui.get(res, response.msgName) || '返回的数据状态异常') + '</div>');
+                        }
+                        that.renderData(res, curr, layui.get(res, response.countName));
+                        if (!options.ajaxSort)
+                            sort();
+                        options.time = (new Date().getTime() - that.startTime) + ' ms'; //耗时（接口请求+视图渲染）
+                        loadIndex && layer.close(loadIndex);
+                        typeof options.done === 'function' && options.done(res, curr, layui.get(res, response.countName));
+                    }, error: function (e, m) {
+                        that.layMain.html('<div class="' + NONE + '">数据接口请求异常</div>');
                         that.renderForm();
-                        return that.layMain.html('<div class="' + NONE + '">' + (layui.get(res, response.msgName) || '返回的数据状态异常') + '</div>');
+                        loadIndex && layer.close(loadIndex);
                     }
-                    that.renderData(res, curr, layui.get(res, response.countName));
-                    if (!options.ajaxSort)
-                        sort();
-                    options.time = (new Date().getTime() - that.startTime) + ' ms'; //耗时（接口请求+视图渲染）
-                    loadIndex && layer.close(loadIndex);
-                    typeof options.done === 'function' && options.done(res, curr, layui.get(res, response.countName));
-                }
-                , error: function (e, m) {
-                    that.layMain.html('<div class="' + NONE + '">数据接口请求异常</div>');
-                    that.renderForm();
-                    loadIndex && layer.close(loadIndex);
-                }
-            });
+                })
+            } else {
+                $.ajax({
+                    type: options.method || 'get'
+                    , url: options.url
+                    , data: $.extend(params, options.where)
+                    , dataType: 'json'
+                    , success: function (res) {
+                        if (layui.get(res, response.statusName) !== response.statusCode) {
+                            that.renderForm();
+                            return that.layMain.html('<div class="' + NONE + '">' + (layui.get(res, response.msgName) || '返回的数据状态异常') + '</div>');
+                        }
+                        that.renderData(res, curr, layui.get(res, response.countName));
+                        if (!options.ajaxSort)
+                            sort();
+                        options.time = (new Date().getTime() - that.startTime) + ' ms'; //耗时（接口请求+视图渲染）
+                        loadIndex && layer.close(loadIndex);
+                        typeof options.done === 'function' && options.done(res, curr, layui.get(res, response.countName));
+                    }
+                    , error: function (e, m) {
+                        that.layMain.html('<div class="' + NONE + '">数据接口请求异常</div>');
+                        that.renderForm();
+                        loadIndex && layer.close(loadIndex);
+                    }
+                });
+            }
         } else if (options.data && options.data.constructor === Array) { //已知数据
             var res = {}
                 , startLimit = curr * options.limit - options.limit
@@ -648,7 +672,7 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
     //数据排序
     Class.prototype.sort = function (th, type, pull, formEvent) {
         var that = this
-            , field=null
+            , field = null
             , res = {}
             , options = that.config
             , filter = options.elem.attr('lay-filter')
@@ -669,6 +693,7 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
         }
 
         field = field || th.data('field');
+
         function getSort(name) {
             if (!sorts) return null;
             for (var i = 0; i < sorts.length; i++) {
@@ -727,7 +752,7 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
 
         //增加后台排序
         if (options.ajaxSort === true) {
-            that.pullData();
+            that.pullData(options.page.curr);
             //thisData = data;
             return;
         } else {
@@ -837,7 +862,7 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
 
         //tbody区域高度
         bodyHeight = parseFloat(height) - parseFloat(that.layHeader.height()) - 1;
-        if(that.layHeader.height() <0 ) {
+        if (that.layHeader.height() < 0) {
             bodyHeight = parseFloat(height) - 39;
         }
         if (options.toolbar) {
@@ -1093,9 +1118,18 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
 
             //显示编辑表单
             if (editType) {
-                if (editType === 'select') { //选择框
-                    //var select = $('<select class="'+ ELEM_EDIT +'" lay-ignore><option></option></select>');
-                    //othis.find('.'+ELEM_EDIT)[0] || othis.append(select);
+                if (typeof editType === 'object') {
+                    othis.find('.' + ELEM_EDIT)[0] || othis.append(editType.templet);
+                } else if (typeof editType === 'function') {
+                    editType({
+                        cellEl: elemCell,
+                        rowEl: othis,
+                        field: field
+                    });
+                }
+                else if (editType === 'select') { //选择框
+                    var select = $('<select class="' + ELEM_EDIT + '" lay-ignore><option></option></select>');
+                    othis.find('.' + ELEM_EDIT)[0] || othis.append(select);
                 } else { //输入框
                     var input = $('<input class="layui-input ' + ELEM_EDIT + '">');
                     input[0].value = othis.data('content') || elemCell.text();

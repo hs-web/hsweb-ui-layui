@@ -1,37 +1,18 @@
-window.API_BASE_PATH = "http://localhost:8089/";
-window.RESOURCE_PATH = "http://localhost:63342/hsweb-ui-layui/";
+importLayui(function () {
+    require(["css!plugin/css/custom"]);
+    var lastAjax = [];
+    window.doLogin = function (callback) {
+        $('.loading-wrap').hide();
+        $('.login-wrap').show();
+        lastAjax.push(callback);
+    };
+    require(["hsForm"], function (hsForm) {
+        hsForm.init();
+    });
 
-var lastAjax = '';
-function doLogin(callback) {
-    var $ = layui.jquery;
-    $('.loading-wrap').hide();
-    $('.login-wrap').show();
-    lastAjax = callback;
-}
-
-layui.config({
-    dir: 'plugins/layui/'
-    , version: false
-    , debug: false
-    , base: 'modules/'
-}).extend({
-    //模块
-    hsTable: 'components/hsTable',
-    hsForm: 'components/hsForm',
-    // 页面
-    menuManage: 'pages/menuManage',
-    userManage: 'pages/user/userManage'
-});
-
-layui.use([ "element", "form","request","hsForm"], function () {
     var $ = layui.jquery;
     var element = layui.element;
     var form = layui.form;
-    var r = layui.request;
-
-
-    //监听测试
-    layui.hsForm.init();
     form.on('submit(test1)', function (data) {
         console.log(layui.hsForm.format(data.field));
 
@@ -41,36 +22,47 @@ layui.use([ "element", "form","request","hsForm"], function () {
 
     //自定义配置项
     var AppConfig = {
-        footer: false,
+        footer: false
     };
+    loadUserTree();
 
-    r.get("menu/user-own/tree", function (e) {
-        console.log(e);
-        if (e.status === 200) {
-            initTopMenu(e.result);
-            element.init();
-            $($("#top-menu").find("a")[0]).click();
-            $('.loading-wrap').hide();
-        }
-    });
+    function loadUserTree() {
+        require(["request"], function (r) {
+            r.get("menu/user-own/tree", function (e) {
+                if (e.status === 200) {
+                    initTopMenu(e.result);
+                    element.init();
+                    $($("#top-menu").find("a")[0]).click();
+                    $('.loading-wrap').hide();
+                    $(".main").fadeIn(200)
+                }
+            });
+        })
+    }
 
     //监听登录
     form.on('submit(loginForm)', function (data) {
-        try{
-            r.post("authorize/login", {username: data.field.username, password: data.field.password, token_type: "jwt"}, function (e) {
-                if( e.status == 200) {
-                    layui.sessionData("hsweb-token", {key: "accessToken", value: e.result.token});
-                    //使用后清空
-                    lastAjax();
-                    lastAjax = '';
-                    //隐藏login
-                    $('.login-wrap').hide();
-                }
-                console.log(e);
-            }, false);
-        } catch (e) {
-            console.log(e)
-        }
+        require(["request"], function (r) {
+            try {
+                r.post("authorize/login", {username: data.field.username, password: data.field.password, token_type: "jwt"}, function (e) {
+                    if (e.status === 200) {
+                        layui.sessionData("hsweb-token", {key: "accessToken", value: e.result.token});
+                        //使用后清空
+                        $(lastAjax).each(function () {
+                            this();
+                        });
+                        lastAjax = [];
+                        //隐藏login
+                        $('.login-wrap').hide();
+                        loadUserTree();
+                    }
+                    //    console.log(e);
+                }, false);
+            } catch (e) {
+                console.log(e)
+            }
+        });
+
         return false;
     });
 
@@ -112,13 +104,12 @@ layui.use([ "element", "form","request","hsForm"], function () {
             layui.element.tabAdd('tabs', {
                 title: menu.name
                 , content: '<div id="tools-' + menu.id + '"></div>' +
-                '<div lay-filter="'+menu.id+'" id="container-' + menu.id + '">' +
+                '<div lay-filter="' + menu.id + '" id="container-' + menu.id + '">' +
                 '</div>'
                 , id: menu.id
             });
-            layui.use(menu.url, function () {
-                var mod = layui[menu.url];
-                mod.init(menu.id);
+            require([menu.url], function (page) {
+                page.init(menu.id);
             });
         }
         layui.element.tabChange('tabs', menu.id);
@@ -152,10 +143,11 @@ layui.use([ "element", "form","request","hsForm"], function () {
         $(leftMenu.children()[0]).addClass("layui-nav-itemed");
         layui.element.init();
     }
-    //读取配置信息
-    if(!AppConfig.footer){
-        $('.layui-footer').hide();
-        $('.layui-body').css('bottom','0');
-    }
-});
 
+    //读取配置信息
+    if (!AppConfig.footer) {
+        $('.layui-footer').hide();
+        $('.layui-body').css('bottom', '0');
+    }
+
+});

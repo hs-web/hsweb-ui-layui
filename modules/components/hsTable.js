@@ -1,10 +1,10 @@
-layui.define(["jquery", "element", "request", "form", "table","laytpl"], function (exports) {
+layui.define(["jquery", "element", "request", "form", "table","laytpl","hsForm"], function (exports) {
     var element = layui.element,
     $ = layui.jquery,
     request = layui.request,
     form = layui.form,
     table = layui.table,
-    laytpl = layui.laytpl;
+    hsForm = layui.hsForm;
 
     function init(id, containerId, url, cols, tools) {
         //查询
@@ -31,10 +31,10 @@ layui.define(["jquery", "element", "request", "form", "table","laytpl"], functio
                     var formInput = $('<input type="text" class="layui-input">').attr('name',item.column);
                 } else if(item.type == 'select') {
                     var formInput = $('<select></select>').attr('name',item.column);
-                    formInput.append($('<option></option>'))
+                    formInput.append($('<option></option>'));
                     item.options.forEach(function(opt) {
                         formInput.append($('<option></option>').text(opt.text).attr('value',opt.value))
-                    })
+                    });
                 }
                 formInputWrap.append(formInput);
                 formItem.append(formLabel).append(formInputWrap);
@@ -73,7 +73,7 @@ layui.define(["jquery", "element", "request", "form", "table","laytpl"], functio
                 , limitName: 'pageSize' //每页数据量的参数名，默认：limit
             },
             page: {
-                curr: 1,
+                curr: 1
             },
             sorts: sorts,
             response: {
@@ -108,7 +108,7 @@ layui.define(["jquery", "element", "request", "form", "table","laytpl"], functio
             return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
         });
 
-        return table;
+        return tableInit;
     }
 
     //格式化terms
