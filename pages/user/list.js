@@ -191,6 +191,10 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
             var layEvent = e.event;
             if (layEvent === 'edit') {
                 edit(data);
+            }else if (layEvent === 'edit_permission') {
+                require(["pages/autz-setting/autz-setting"], function (setting) {
+                    setting("user", data.id)
+                });
             }
         })
     }
