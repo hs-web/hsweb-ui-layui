@@ -1,4 +1,12 @@
+/**
+ * 后台服务接口根路径
+ * @type {string}
+ */
 window.API_BASE_PATH = "http://localhost:8089/";
+/**
+ * 资源文件根路径
+ * @type {string}
+ */
 window.RESOURCE_PATH = "/hsweb-ui-layui/";
 
 
