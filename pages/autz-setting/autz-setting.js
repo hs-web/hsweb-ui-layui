@@ -257,7 +257,7 @@ define(["request", "hsForm"], function (request, hsForm) {
 
         function getMenu(id) {
             for (var i = 0; i < autzSetting.menus.length; i++) {
-                if (autzSetting.menus[i].id === id) {
+                if (autzSetting.menus[i].menuId === id) {
                     return autzSetting.menus[i];
                 }
             }
@@ -310,6 +310,7 @@ define(["request", "hsForm"], function (request, hsForm) {
                         hsForm.openForm({
                             template: {html: html, components: []},
                             onOpen: function (formEl, ready) {
+
                                 $(resp.result).each(function () {
                                     if (getMenu(this.id)) {
                                         this.checked = true;
