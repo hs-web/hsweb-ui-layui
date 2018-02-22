@@ -2,6 +2,7 @@ window.API_BASE_PATH = "http://localhost:8089/";
 window.RESOURCE_PATH = "http://localhost:63342/hsweb-ui-layui/";
 
 var lastAjax = '';
+
 function doLogin(callback) {
     var $ = layui.jquery;
     $('.loading-wrap').hide();
@@ -23,7 +24,7 @@ layui.config({
     userManage: 'pages/user/userManage'
 });
 
-layui.use([ "element", "form","request","hsForm"], function () {
+layui.use(["element", "form", "request", "hsForm"], function () {
     var $ = layui.jquery;
     var element = layui.element;
     var form = layui.form;
@@ -41,7 +42,7 @@ layui.use([ "element", "form","request","hsForm"], function () {
 
     //自定义配置项
     var AppConfig = {
-        footer: false,
+        footer: false
     };
 
     r.get("menu/user-own/tree", function (e) {
@@ -56,17 +57,18 @@ layui.use([ "element", "form","request","hsForm"], function () {
 
     //监听登录
     form.on('submit(loginForm)', function (data) {
-        try{
+        try {
             r.post("authorize/login", {username: data.field.username, password: data.field.password, token_type: "jwt"}, function (e) {
-                if( e.status == 200) {
+                if (e.status === 200) {
                     layui.sessionData("hsweb-token", {key: "accessToken", value: e.result.token});
                     //使用后清空
                     lastAjax();
                     lastAjax = '';
                     //隐藏login
                     $('.login-wrap').hide();
+                } else {
+                    layer.alert(e.message === '{password_error}' ? "密码错误" : e.message,{zIndex:999999999});
                 }
-                console.log(e);
             }, false);
         } catch (e) {
             console.log(e)
@@ -112,7 +114,7 @@ layui.use([ "element", "form","request","hsForm"], function () {
             layui.element.tabAdd('tabs', {
                 title: menu.name
                 , content: '<div id="tools-' + menu.id + '"></div>' +
-                '<div lay-filter="'+menu.id+'" id="container-' + menu.id + '">' +
+                '<div lay-filter="' + menu.id + '" id="container-' + menu.id + '">' +
                 '</div>'
                 , id: menu.id
             });
@@ -152,10 +154,21 @@ layui.use([ "element", "form","request","hsForm"], function () {
         $(leftMenu.children()[0]).addClass("layui-nav-itemed");
         layui.element.init();
     }
+
+    $(".sign-out").on('click',function () {
+        layer.confirm("确认退出本系统?",function () {
+            r.get("authorize/exit",function () {
+                doLogin(function () {
+
+                });
+            })
+        });
+
+    });
     //读取配置信息
-    if(!AppConfig.footer){
+    if (!AppConfig.footer) {
         $('.layui-footer').hide();
-        $('.layui-body').css('bottom','0');
+        $('.layui-body').css('bottom', '0');
     }
 });
 

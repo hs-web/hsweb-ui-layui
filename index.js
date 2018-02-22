@@ -55,6 +55,8 @@ importLayui(function () {
                         //隐藏login
                         $('.login-wrap').hide();
                         loadUserTree();
+                    } else {
+                        layer.alert(e.message === '{password_error}' ? "密码错误" : e.message, {zIndex: 999999999});
                     }
                     //    console.log(e);
                 }, false);
@@ -114,6 +116,22 @@ importLayui(function () {
         }
         layui.element.tabChange('tabs', menu.id);
     }
+
+    $(".sign-out").on('click', function () {
+        layer.confirm("确认退出本系统?", {btn: ['退出','取消']},function () {
+            layer.closeAll();
+            require(["request"], function (r) {
+                r.get("authorize/exit", function () {
+                    layui.sessionData("hsweb-token", {key: "accessToken", value: null});
+                    doLogin(function () {
+
+                    });
+                })
+            });
+            return true;
+        });
+
+    });
 
     function initLeftMenu(menus) {
         var leftMenu = $("#left-menu");

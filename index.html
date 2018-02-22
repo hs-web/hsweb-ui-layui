@@ -20,9 +20,10 @@
                 <dl class="layui-nav-child">
                     <dd><a href="">基本资料</a></dd>
                     <dd><a href="">安全设置</a></dd>
+                    <dd><a class="sign-out" href="javascript:void(0)">退出</a></dd>
                 </dl>
             </li>
-            <li class="layui-nav-item"><a href="">退出</a></li>
+            <!--<li class="layui-nav-item"><a class="sign-out" href="javascript:void(0)">退出</a></li>-->
         </ul>
     </div>
 
@@ -52,10 +53,10 @@
 </div>
 
 <!--登录-->
-<div class="login-wrap" style="z-index: 9999999999;display: none">
+<div class="login-wrap" style="z-index: 50000;display: none">
     <form class="layui-form" action="">
         <div class="login-title">
-            LOGO
+            hsweb企业后台管理系统
         </div>
         <div class="layui-form-item">
             <input type="text" name="username" required  lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
