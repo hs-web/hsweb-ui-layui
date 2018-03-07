@@ -268,7 +268,7 @@ layui.define(["jquery", "element", "request", "form", "layer", "laydate"], funct
             try {
                 if (callback && callback(data.field)) {
                     layer.close(index);
-                    $("#formId").remove();
+                    $("#" + formId).remove();
                 }
             } catch (e) {
                 console.error(e);
