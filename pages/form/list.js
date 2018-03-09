@@ -4,7 +4,7 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
         var id = "table" + new Date().getTime();
         var table;
         //打开编辑窗口
-        function openSaveWindow(data,callback){
+        function openSaveWindow(data,openCallback,submitCallback){
             var dataId = data ? data.id : "";
             require(["text!pages/form/save.html"], function (html) {
                 hsForm.openForm({
@@ -13,13 +13,42 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
                     template: {html: html, components: []},
                     data: data,
                     onOpen: function (formEl, ready) {
-                        request.get(window.API_BASE_PATH + '/dynamic/form/column/' + dataId,function (response) {
-                            layui.table.init('field-table',{data:response.result})
+                        request.get(window.API_BASE_PATH + '/datasource',function (data) {
+                            var select = $('select[name="dataSourceId"]')
+                            console.info(data)
+                            ready()
                         })
+
+                        $('[data-select-id="add-column-btn"]').unbind('click')
+                        $('[data-select-id="add-column-btn"]').click(function () {
+                            require(["text!pages/form/saveColumns.html"],function (html) {
+                                hsForm.openForm({
+                                    title: "添加字段",
+                                    area: ["600px", "400px"],
+                                    template: {html: html, components: []},
+                                    data: null,
+                                    onOpen: null,
+                                    onSubmit: function (data) {
+                                        var value = JSON.parse($('input[name="columns"]').val())
+                                        value.push(data)
+                                        $('input[name="columns"]').val(JSON.stringify(value))
+                                        var tr = $('<tr></tr>')
+                                        tr.append('<td>'+data.name+'</td>')
+                                        tr.append('<td>'+data.columnName+'</td>')
+                                        tr.append('<td>'+data.alias+'</td>')
+                                        tr.append('<td>'+data.describe+'</td>')
+                                        tr.append('<td>'+data.jdbcType+'</td>')
+                                        tr.append('<td>'+data.javaType+'</td>')
+                                        tr.append('<td>'+data.length+'</td>')
+                                        tr.append('<td><button class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">&#x1006;</i></button></td>')
+                                        $('[data-select-id="field-table-body"]').append(tr)
+                                    }
+                                });
+                            })
+                        })
+                        if(openCallback) openCallback();
                     },
-                    onSubmit: function (formData, formEl) {
-                        return false;
-                    }
+                    onSubmit: submitCallback
                 });
             })
         }
@@ -27,7 +56,7 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
         function edit(data) {
             openSaveWindow(data)
         }
-        
+
         table = hsTable.init(id, containerId, "/dynamic/form", [[
             {field: 'id', title: "", sort: true, width: "10%"},
             {field: 'type ', title: "表单类型", width: "10%"},
@@ -49,8 +78,8 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
                 name: '新建',
                 class: '',
                 callback: function () {
-                    openSaveWindow(null,function () {
-                        
+                    openSaveWindow(null,null,function (formData,formEl) {
+                        console.info(formData)
                     })
                 }
             }],
