@@ -9,41 +9,36 @@
         <div class="layui-tab-item layui-show">
             <div class="layui-col-md6 layui-col-xs12">
                 <div class="layui-form-item brick"><label class="layui-form-label" style="">表单ID</label>
-                    <div class="layui-input-block"><input type="text" class="layui-input" name="id" size="6"></div>
+                    <div class="layui-input-block"><input type="text" class="layui-input" lay-verify="required" name="id" size="6"></div>
                 </div>
             </div>
             <div class="layui-col-md6 layui-col-xs12">
                 <div class="layui-form-item brick"><label class="layui-form-label" style="">绑定数据源</label>
                     <div class="layui-input-block">
-                        <select name="city" lay-verify="required">
-                            <option value=""></option>
-                            <option value="0">北京</option>
-                            <option value="1">上海</option>
-                            <option value="2">广州</option>
-                            <option value="3">深圳</option>
-                            <option value="4">杭州</option>
+                        <select name="dataSourceId">
+                            <option value="">默认数据源</option>
                         </select>
                     </div>
                 </div>
             </div>
             <div class="layui-col-md6 layui-col-xs12">
                 <div class="layui-form-item brick"><label class="layui-form-label" style="">表单名称</label>
-                    <div class="layui-input-block"><input type="text" class="layui-input" name="name" size="6"></div>
+                    <div class="layui-input-block"><input type="text" lay-verify="required" class="layui-input" name="name" size="6"></div>
                 </div>
             </div>
             <div class="layui-col-md6 layui-col-xs12">
                 <div class="layui-form-item brick"><label class="layui-form-label" style="">表单类型</label>
-                    <div class="layui-input-block"><input type="text" class="layui-input" name="type" size="6"></div>
+                    <div class="layui-input-block"><input type="text" lay-verify="required" class="layui-input" name="type" size="6"></div>
                 </div>
             </div>
             <div class="layui-col-md6 layui-col-xs12">
                 <div class="layui-form-item brick"><label class="layui-form-label" style="">物理表名</label>
-                    <div class="layui-input-block"><input type="text" class="layui-input" name="databaseTableName" size="6"></div>
+                    <div class="layui-input-block"><input type="text" lay-verify="required" class="layui-input" name="databaseTableName" size="6"></div>
                 </div>
             </div>
             <div class="layui-col-md6 layui-col-xs12">
                 <div class="layui-form-item brick"><label class="layui-form-label" style="">别名</label>
-                    <div class="layui-input-block"><input type="text" class="layui-input" name="alias" size="6"></div>
+                    <div class="layui-input-block"><input type="text" lay-verify="required" class="layui-input" name="alias" size="6"></div>
                 </div>
             </div>
             <div class="layui-col-md12">
@@ -81,7 +76,7 @@
             </table>
             <input type="hidden" name="columns" value="[]"/>
         </div>
-        <div class="layui-tab-item">内容3</div>
-        <div class="layui-tab-item">内容4</div>
+        <div class="layui-tab-item"></div>
+        <div class="layui-tab-item"></div>
     </div>
 </div>

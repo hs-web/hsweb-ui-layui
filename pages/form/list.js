@@ -1,3 +1,29 @@
+function setColumnsValue(update) {
+    var value = $('input[name="columns"]').val()
+    value = JSON.parse(value == '' ? '[]':value)
+    var boo = update(value)
+    if(boo != false){
+        $('input[name="columns"]').val(JSON.stringify(value))
+    }
+    return boo != false
+}
+
+function setColumnsTableBody(data) {
+    var tr = $('<tr data-value="'+data.id+'"></tr>')
+    tr.append('<td>'+data.name+'</td>')
+    tr.append('<td>'+data.columnName+'</td>')
+    tr.append('<td>'+data.alias+'</td>')
+    tr.append('<td>'+data.describe+'</td>')
+    tr.append('<td>'+data.jdbcType+'</td>')
+    tr.append('<td>'+data.javaType+'</td>')
+    tr.append('<td>'+data.length+'</td>')
+    tr.append('<td><button class="layui-btn layui-btn-danger layui-btn-xs" data-value="'+data.name+'" ' +
+        'data-select-id="deleteColumnsBtn">' +
+        '<i class="layui-icon">&#x1006;</i>' +
+        '</button></td>')
+    $('[data-select-id="field-table-body"]').append(tr)
+}
+
 define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
 
     function init(containerId) {
@@ -15,12 +41,14 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
                     onOpen: function (formEl, ready) {
                         request.get(window.API_BASE_PATH + '/datasource',function (data) {
                             var select = $('select[name="dataSourceId"]')
-                            console.info(data)
+                            $(data.result).each(function () {
+                                select.append('<option value="'+this.id+'">'+this.name+'</option>')
+                            })
                             ready()
+                            if(openCallback) openCallback(formEl);
                         })
 
-                        $('[data-select-id="add-column-btn"]').unbind('click')
-                        $('[data-select-id="add-column-btn"]').click(function () {
+                        $(formEl).on('click','[data-select-id="add-column-btn"]',function () {
                             require(["text!pages/form/saveColumns.html"],function (html) {
                                 hsForm.openForm({
                                     title: "添加字段",
@@ -29,24 +57,20 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
                                     data: null,
                                     onOpen: null,
                                     onSubmit: function (data) {
-                                        var value = JSON.parse($('input[name="columns"]').val())
-                                        value.push(data)
-                                        $('input[name="columns"]').val(JSON.stringify(value))
-                                        var tr = $('<tr></tr>')
-                                        tr.append('<td>'+data.name+'</td>')
-                                        tr.append('<td>'+data.columnName+'</td>')
-                                        tr.append('<td>'+data.alias+'</td>')
-                                        tr.append('<td>'+data.describe+'</td>')
-                                        tr.append('<td>'+data.jdbcType+'</td>')
-                                        tr.append('<td>'+data.javaType+'</td>')
-                                        tr.append('<td>'+data.length+'</td>')
-                                        tr.append('<td><button class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">&#x1006;</i></button></td>')
-                                        $('[data-select-id="field-table-body"]').append(tr)
+                                        if(setColumnsValue(function (value) {
+                                            if(value[data.name]){
+                                                layui.layer.msg('字段名称重复')
+                                                return false
+                                            }
+                                            value[data.name] = data
+                                        })){
+                                            setColumnsTableBody(data)
+                                            return true
+                                        }
                                     }
                                 });
                             })
                         })
-                        if(openCallback) openCallback();
                     },
                     onSubmit: submitCallback
                 });
@@ -54,7 +78,66 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
         }
 
         function edit(data) {
-            openSaveWindow(data)
+            openSaveWindow(data,function (formEl) {
+                $(formEl).append('<input type="hidden" name="deleteColumns" value="{}" />')
+                request.get(window.API_BASE_PATH + 'dynamic/form/column/' + data.id,function (r) {
+                    $(r.result).each(function () {
+                        setColumnsTableBody(this)
+                    })
+                })
+
+                $(formEl).on('click','[data-select-id="deleteColumnsBtn"]',function () {
+                    var tr = $(this).parent().parent()
+                    var id = tr.attr('data-value')
+
+                    var value = JSON.parse($('[name="deleteColumns"]').val())
+                    value[id] = id
+                    $('[name="deleteColumns"]').val(JSON.stringify(value))
+
+                    tr.remove()
+                })
+            },function (formData,formEl) {
+                request.patch(window.API_BASE_PATH + '/dynamic/form',formData,function (r) {
+                    if(r.status && r.status == 200){
+                        var columnIds = ''
+                        var value = JSON.parse($('[name="deleteColumns"]').val())
+                        for (var id in value){
+                            columnIds = columnIds + id + ','
+                        }
+                        request.delete(window.API_BASE_PATH + 'dynamic/form/column?ids=' + columnIds,function (r) {
+                            if(r.status && r.status == 200){
+                                if(formData.columns){
+                                    var columns = JSON.parse(formData.columns)
+                                    formData.columns = []
+                                    for (var name in columns){
+                                        if(columns[name] != null){
+                                            columns[name].formId = formData.id
+                                            formData.columns.push(columns[name])
+                                        }
+                                    }
+                                    request.patch(window.API_BASE_PATH + 'dynamic/form/column/batch',formData.columns,function (r) {
+                                        if(r.status && r.status == 200){
+                                            layui.layer.closeAll()
+                                            table.reload()
+                                            return true
+                                        }else{
+                                            layui.layer.msg(r.message)
+                                        }
+                                    })
+                                }else{
+                                    layui.layer.closeAll()
+                                    table.reload()
+                                    return true
+                                }
+                            }else{
+                                layui.layer.msg(r.message)
+                            }
+                        })
+                    }else{
+                        layui.layer.msg(r.message)
+                    }
+                })
+            })
         }
 
         table = hsTable.init(id, containerId, "/dynamic/form", [[
@@ -70,7 +153,8 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
             },
             {
                 title: "操作", align: "center", width: "10%", toolbar: "<script type='text/html'>" +
-                "<button lay-event=\"edit\" class='layui-btn layui-btn-sm'><i class=\"layui-icon\">&#xe642;</i>编辑</button>" +
+                "<button lay-event=\"edit\" class='layui-btn layui-btn-sm'><i class=\"layui-icon\">&#xe642;</i></button>" +
+                '<button lay-event="delete" class="layui-btn layui-btn-sm layui-btn-danger"><i class="layui-icon">&#xe640;</i></button>'+
                 "</script>"
             }
         ]], {
@@ -78,8 +162,38 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
                 name: '新建',
                 class: '',
                 callback: function () {
-                    openSaveWindow(null,null,function (formData,formEl) {
-                        console.info(formData)
+                    openSaveWindow(null,function (formEl) {
+                        $(formEl).on('click','[data-select-id="deleteColumnsBtn"]',function () {
+                            var tr = $(this).parent().parent()
+                            var name = $(tr.find('td')[0]).text()
+                            setColumnsValue(function (value) {
+                                value[name] = null
+                                tr.remove()
+                            })
+                        })
+                    },function (formData,formEl) {
+                        request.post(window.API_BASE_PATH + '/dynamic/form',formData,function (r) {
+                            if(r.status && r.status == 200){
+                                var columns = JSON.parse(formData.columns)
+                                formData.columns = []
+                                for (var name in columns){
+                                    if(columns[name] != null){
+                                        columns[name].formId = r.result[0]
+                                        formData.columns.push(columns[name])
+                                    }
+                                }
+                                request.patch(window.API_BASE_PATH + 'dynamic/form/column/batch',formData.columns,function (r) {
+                                    if(r.status && r.status == 200){
+                                        layui.layer.closeAll()
+                                        table.reload()
+                                    }else{
+                                        layui.layer.msg(r.message)
+                                    }
+                                })
+                            }else{
+                                layui.layer.msg(r.message)
+                            }
+                        })
                     })
                 }
             }],
@@ -112,6 +226,20 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
             var layEvent = e.event;
             if (layEvent === 'edit') {
                 edit(data);
+            }else if(layEvent === 'delete'){
+                layer.open({
+                    content: '删除后不可回复，是否确认删除?',
+                    yes: function(index, layero){
+                        request.delete(window.API_BASE_PATH + 'dynamic/form/'+e.data.id,function (r) {
+                            if(r.status && r.status == 200){
+                                layer.close(index)
+                                table.reload()
+                            }else{
+                                layui.layer.msg(r.message)
+                            }
+                        })
+                    }
+                })
             }
         })
     }
