@@ -292,11 +292,11 @@ Component.prototype.remove = function () {
                                 var html = component.getContainer();
                                 item.children().remove();
                                 item.append(html);
-                               // html.find('.layui-form-label,legend').click();
-                               // initPropertiesEditor(component);
+                                // html.find('.layui-form-label,legend').click();
+                                // initPropertiesEditor(component);
                                 designer.doEvent("configChanged", me);
                                 parser.render();
-                                me.nowEditComponent=component;
+                                me.nowEditComponent = component;
                             }
                             // initDroppable();
                         }, stop: function (event, ui) {
@@ -469,9 +469,13 @@ Component.prototype.remove = function () {
         }
     };
     var designer = new Designer();
-    window.setTimeout(function () {
-        designer.init();
-    }, 100);
+    if (window.ready) {
+        window.ready(designer)
+    } else {
+        window.setTimeout(function () {
+            designer.init();
+        }, 100);
+    }
     window.getDesigner = function () {
         return designer;
     }
