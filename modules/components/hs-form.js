@@ -239,12 +239,22 @@ define(["jquery", "request"], function ($, request) {
             onOpen = config.onOpen;
 
         var formId = "f" + new Date().getTime();
+
+        //自定义按钮
+        var cus_btns = ''
+        if(config.btn && config.btn.templates && config.btn.templates.length > 0){
+            $(config.btn.templates).each(function () {
+                cus_btns += this.toString()
+            })
+        }
+
         var html = [
             "<form id='" + formId + "' class='layui-form layui-form-pane' style='width: 98%;margin: auto' onsubmit='return false' action=''>",
             "<div class='layui-row'>",
             template.html,
             "</div>",
-            "<div style='width: 200px;margin: auto;bottom: 0px'>",
+            "<div style='width: "+((config.btn && config.btn.width) ? config.btn.width:200)+"px;margin: auto;bottom: 0px'>",
+            cus_btns,
             "<button class='layui-btn' lay-submit lay-filter='" + formId + "'>提交</button>",
             "<button type='reset' class='layui-btn layui-btn-danger' lay-reset>重置</button>",
             "</div>",
