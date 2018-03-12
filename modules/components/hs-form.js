@@ -298,7 +298,7 @@ define(["jquery", "request"], function ($, request) {
             }
             return false;
         });
-
+        return index;
     }
 
     //回填数据
