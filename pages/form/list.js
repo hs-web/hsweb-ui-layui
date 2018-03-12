@@ -1,9 +1,15 @@
 function setColumnsValue(update) {
     var value = $('input[name="columns"]').val()
-    value = JSON.parse(value == '' ? '[]':value)
+    value = JSON.parse(value == '' ? '{}':value)
     var boo = update(value)
     if(boo != false){
-        $('input[name="columns"]').val(JSON.stringify(value))
+        var tmp = []
+        for (var name in value){
+            if(value[name]){
+                tmp.push(value[name])
+            }
+        }
+        $('input[name="columns"]').val(JSON.stringify(tmp))
     }
     return boo != false
 }
@@ -65,6 +71,7 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
                                             value[data.name] = data
                                         })){
                                             setColumnsTableBody(data)
+                                            console.info($('input[name="columns"]'))
                                             return true
                                         }
                                     }
@@ -178,7 +185,7 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
                                 formData.columns = []
                                 for (var name in columns){
                                     if(columns[name] != null){
-                                        columns[name].formId = r.result[0]
+                                        columns[name].formId = r.result
                                         formData.columns.push(columns[name])
                                     }
                                 }
