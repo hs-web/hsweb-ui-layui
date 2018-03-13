@@ -4,31 +4,6 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
     var designer
     var contentWindow
 
-    function iframeInit(formEl,ready,openCallBack,data) {
-        contentWindow = $('#template-designer-iframe')[0].contentWindow
-        contentWindow.ready = function (e) {
-            designer = e;
-            window.setTimeout(function () {
-                designer.init()
-                $(formEl).parent().on('click','[data-select-id="look"]',function () {
-                    layui.layer.open({
-                        area: ['800px', '500px'],
-                        title:'预览',
-                        content: designer.getHtml()
-                    })
-                })
-                if(data && data.config){
-                    var config = JSON.parse(data.config)
-                    e.loadConfig(config)
-                }
-                if(openCallBack){
-                    openCallBack(designer)
-                }
-                ready()
-            },100)
-        }
-    }
-
     function formSubmit(formData,formEl,submitCallBack) {
         formData.config = JSON.stringify(designer.getConfig())
         request.patch(window.API_BASE_PATH + 'template',formData,function (r) {
@@ -82,7 +57,7 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
                 openEditModel(data);
             }else if(layEvent === 'delete'){
                 layer.open({
-                    content: '删除后不可回复，是否确认删除?',
+                    content: '删除后不可恢复，是否确认删除?',
                     yes: function(index, layero){
                         request.delete(window.API_BASE_PATH + 'template/' + data.id,function (r) {
                             if(r.status && r.status == 200){
@@ -100,7 +75,53 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
     }
     
     function openModel(title,openCallBack,submitCallBack,data) {
+        data = data ? data : {}
         require(["text!pages/template/create.html"], function (html) {
+            
+            function baseInit(ready,formEl,data,first) {
+                if(first){
+                    ready()
+                    layui.form.on('select(typeSelect)', function(d){
+                        baseInit(ready,formEl,{type:d.value},false)
+                    });
+                }
+                if(data.type == 'hf'){
+                    frameBuild(ready,formEl,data)
+                }else if(data.type == 'hl'){
+                    listBuild(ready,formEl,data)
+                }
+            }
+            
+            function frameBuild(ready,formEl,data) {
+                var show = $(formEl).find('[data-select-id="show"]')
+                show.find('[data-show]').hide()
+                show.find('[data-show="form"]').show()
+                contentWindow = $(formEl).find('#template-designer-iframe')[0].contentWindow
+                contentWindow.ready = function (e) {
+                    designer = e;
+                    window.setTimeout(function () {
+                        designer.init()
+                        $(formEl).parent().on('click','[data-select-id="look"]',function () {
+                            layui.layer.open({
+                                area: ['800px', '500px'],
+                                title:'预览',
+                                content: designer.getHtml()
+                            })
+                        })
+                        if(data && data.config){
+                            var config = JSON.parse(data.config)
+                            e.loadConfig(config)
+                        }
+                    },100)
+                }
+            }
+            
+            function listBuild(ready,formEl,data) {
+                var show = $(formEl).find('[data-select-id="show"]')
+                show.find('[data-show]').hide()
+                show.find('[data-show="list"]').show()
+            }
+            
             hsForm.openForm({
                 title: title,
                 area: ["1400px", "800px"],
@@ -109,9 +130,9 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
                     templates:['<button class="layui-btn layui-btn-normal" data-select-id="look">预览</button>'],
                     width:300
                 },
-                data:data ? data : {},
+                data: data,
                 onOpen: function (formEl,ready) {
-                    iframeInit(formEl,ready,openCallBack,data)
+                    baseInit(ready,formEl,data,true)
                 },
                 onSubmit:function (formData,formEl) {
                     formSubmit(formData,formEl,submitCallBack)

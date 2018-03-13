@@ -14,8 +14,9 @@
         <div class="layui-col-md6 layui-col-xs12">
             <div class="layui-form-item brick"><label class="layui-form-label" style="">模板类型</label>
                 <div class="layui-input-block">
-                    <select name="type">
+                    <select name="type" lay-filter="typeSelect">
                         <option value="hf">表单</option>
+                        <option value="hl">数据列表</option>
                     </select>
                 </div>
             </div>
@@ -27,8 +28,11 @@
         </div>
     </div>
     <div data-select-id="show">
-        <div show-id="hf">
+        <div data-show="form">
             <iframe src="modules/form/designer.html" id="template-designer-iframe" class="template-designer-iframe"></iframe>
+        </div>
+        <div data-show="list">
+            <iframe src="pages/template/dataList.html" id="data-list-iframe" class="template-designer-iframe"></iframe>
         </div>
     </div>
 </div>
