@@ -2,22 +2,10 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
 
     var table
     var designer
-    var contentWindow
+    var designerWindow
 
-    function formSubmit(formData,formEl,submitCallBack) {
-        formData.config = JSON.stringify(designer.getConfig())
-        request.patch(window.API_BASE_PATH + 'template',formData,function (r) {
-            if(r.status && r.status == 200){
-                if(submitCallBack){
-                    submitCallBack(r)
-                }
-                layui.layer.closeAll()
-                table.reload()
-            }else{
-                layui.layer.msg(r.message)
-            }
-        })
-    }
+    var listOption
+    var listWindow
 
     //初始化
     function init(containerId) {
@@ -93,11 +81,10 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
             }
             
             function frameBuild(ready,formEl,data) {
-                var show = $(formEl).find('[data-select-id="show"]')
-                show.find('[data-show]').hide()
-                show.find('[data-show="form"]').show()
-                contentWindow = $(formEl).find('#template-designer-iframe')[0].contentWindow
-                contentWindow.ready = function (e) {
+                var frame = $('<iframe src="modules/form/designer.html" id="template-designer-iframe" class="template-designer-iframe"></iframe>')
+                $(formEl).find('[data-select-id="show"]').empty().append(frame)
+                designerWindow = frame[0].contentWindow
+                designerWindow.ready = function (e) {
                     designer = e;
                     window.setTimeout(function () {
                         designer.init()
@@ -115,11 +102,37 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
                     },100)
                 }
             }
+
+            function formSubmit(formData,formEl,submitCallBack) {
+                formData.config = JSON.stringify(designer.getConfig())
+                request.patch(window.API_BASE_PATH + 'template',formData,function (r) {
+                    if(r.status && r.status == 200){
+                        if(submitCallBack){
+                            submitCallBack(r)
+                        }
+                        layui.layer.closeAll()
+                        table.reload()
+                    }else{
+                        layui.layer.msg(r.message)
+                    }
+                })
+            }
             
             function listBuild(ready,formEl,data) {
-                var show = $(formEl).find('[data-select-id="show"]')
-                show.find('[data-show]').hide()
-                show.find('[data-show="list"]').show()
+                var frame = $('<iframe src="pages/template/dataList.html" id="data-list-iframe" class="template-designer-iframe"></iframe>')
+                $(formEl).find('[data-select-id="show"]').empty().append(frame)
+                listWindow = frame[0].contentWindow
+                listWindow.ready = function (obj) {
+                    listOption = obj
+                    listOption.loadConfig({
+                        columns:[{field:'name',displayField:'name',header:'name',width:'10%',condition:'1111',renderer:'121212'}]
+                    })
+                }
+            }
+            
+            function listSubmit(formData,formEl,submitCallBack) {
+                console.info(listOption.getColumns())
+                console.info(listOption.getBtns())
             }
             
             hsForm.openForm({
@@ -135,7 +148,11 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
                     baseInit(ready,formEl,data,true)
                 },
                 onSubmit:function (formData,formEl) {
-                    formSubmit(formData,formEl,submitCallBack)
+                    if(formData.type == 'hf'){
+                        formSubmit(formData,formEl,submitCallBack)
+                    }else if(formData.type == 'hl'){
+                        listSubmit(formData,formEl,submitCallBack)
+                    }
                 }
             })
         })
