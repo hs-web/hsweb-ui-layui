@@ -21,7 +21,40 @@
         <li>自定义脚本</li>
     </ul>
     <div class="layui-tab-content">
-        <div class="layui-tab-item layui-show">内容1</div>
+        <div class="layui-tab-item layui-show">
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <div class="layui-input-block">
+
+                </div>
+            </div>
+            <div class="layui-collapse">
+                <div class="layui-colla-item">
+                    <h2 class="layui-colla-title">数据接口</h2>
+                    <div class="layui-colla-content layui-show">
+                        <input type="text" name="url" required  lay-verify="required" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-colla-item">
+                    <h2 class="layui-colla-title">
+                        <span>工具栏</span>
+                        <button class="layui-btn layui-btn-xs" data-select-id="addToolbar"><i class="layui-icon">&#xe654;</i></button>
+                    </h2>
+                    <div class="layui-colla-content layui-show">
+                        <ul class="layui-nav" lay-filter="toolbar"></ul>
+                    </div>
+                </div>
+                <div class="layui-colla-item">
+                    <h2 class="layui-colla-title">
+                        <span>查询条件</span>
+                        <button class="layui-btn layui-btn-xs" data-select-id="addCondition"><i class="layui-icon">&#xe654;</i></button>
+                    </h2>
+                    <div class="layui-colla-content layui-show layui-col-md12 layui-col-xs12">
+                        <form class="layui-form layui-col-md12 layui-col-xs12" lay-filter="condition"></form>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="layui-tab-item">
             <table lay-data="{id:'dataListColumnsTable'}" class="layui-table" lay-filter="dataListColumnsTable">
                 <thead>
@@ -61,12 +94,13 @@
         </div>
     </div>
 </div>
-
 </body>
 </html>
 <script src="../../plugins/layui/layui.all.js"></script>
 <script src="../../plugins/jquery-ui/jquery.js"></script>
 <script src="../../plugins/jquery-ui/jquery-ui.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/html" id="empty">
     <span style="display: none">{{# JSON.stringify(d)}}</span>
 </script>
@@ -78,11 +112,13 @@
 <script type="text/javascript">
 
     //列表配置JS对象
-    var ListOption = function (table) {
+    var ListOption = function (table,element) {
 
         this.state = {
             columns:[],
             btns:[],
+            toolbar:[],
+            condition:[]
         }
 
         this.loadConfig = function (config) {
@@ -104,6 +140,22 @@
                         this.reloadBtnsTable()
                     }
 
+                    if(config.toolbar){
+                        this.state.toolbar = config.toolbar
+                        for(var i = 0; i < this.state.toolbar.length; i++){
+                            this.state.toolbar[i].code = new Date().getTime()
+                        }
+                        this.reloadToolBar()
+                    }
+
+                    if(config.condition){
+                        this.state.condition = config.condition
+                        for(var i = 0; i < this.state.condition.length; i++){
+                            this.state.condition[i].code = new Date().getTime()
+                        }
+                        this.reloadCondition()
+                    }
+
                 }
             }
         }
@@ -115,7 +167,6 @@
                     actions: this.getBtns(),
                     columns: this.getColumns(),
                 }
-
             }
         }
 
@@ -236,13 +287,93 @@
             return tmp
         }
         //--------按钮配置-------结束----------
+
+
+        //-------工具栏--------开始-----------
+        this.reloadToolBar = function () {
+            var toolbar = $('[lay-filter="toolbar"]').empty()
+            for(var i = 0; i < this.state.toolbar.length; i++){
+                var line = this.state.toolbar[i]
+                var tmp = $('<li class="layui-nav-item" data-select-id="toolbar-show" data-code="'+line.code+'"></li>')
+                tmp.append('<a href="javascript:void(0);">'+((line.iconCls && line.iconCls != '') ? '<i class="layui-icon">'+line.iconCls+'</i>&nbsp;':'')+line.text+'</a>')
+                if(line.type == 'menuButton'){
+                    var dl = $('<dl class="layui-nav-child"></dl>')
+                    for(var j = 0; j < line.children.length; j++){
+                        dl.append('<dd><a href="javascript:void(0);">'+((line.children[j].iconCls && line.children[j].iconCls != '') ? '<i class="layui-icon">'+line.children[j].iconCls+'</i>&nbsp;':'')+line.children[j].text+'</a></dd>')
+                    }
+                    tmp.append(dl)
+                }
+                toolbar.append(tmp)
+            }
+            element.render('nav')
+        }
+
+        this.deleteToolBar = function (code) {
+            var tmp = []
+            for(var i = 0; i < this.state.toolbar.length; i++){
+                if(this.state.toolbar[i].code != code){
+                    tmp.push(this.state.toolbar[i])
+                }
+            }
+            this.state.toolbar = tmp
+            this.reloadToolBar()
+        }
+        
+        this.addToolBar = function (line) {
+            line.code = new Date().getTime()
+            this.state.toolbar.push(line)
+            this.reloadToolBar()
+        }
+
+        this.getToolBar = function (code) {
+            for(var i = 0; i < this.state.toolbar.length; i++){
+                if(this.state.toolbar[i].code == code){
+                    return this.state.toolbar[i]
+                }
+            }
+        }
+        //-------工具栏--------结束-----------
+
+
+        //--------查询条件--------开始----------
+        this.reloadCondition = function () {
+            var panel = $('[lay-filter="condition"]').empty()
+            for(var i = 0; i < this.state.condition.length; i++){
+                console.info(this.state.condition[i])
+                var html = ' <div class="layui-form-item layui-col-md'+this.state.condition[i].size+' layui-col-xs'+this.state.condition[i].size+'">\n' +
+                    '    <label class="layui-form-label">'+this.state.condition[i].text+'</label>\n' +
+                    '    <div class="layui-input-block">\n' +
+                    '      <input type="text" required  lay-verify="required" placeholder="'+this.state.condition[i].editor.emptyText+'" autocomplete="off" class="layui-input">\n' +
+                    '    </div>\n' +
+                    '  </div>'
+                panel.append(html)
+            }
+        }
+
+        this.addCondition = function (line) {
+            line.code = new Date().getTime()
+            this.state.condition.push(line)
+            this.reloadCondition()
+        }
+
+        this.deleteCondition = function (code) {
+            var tmp = []
+            for(var i = 0; i < this.state.condition.length; i++){
+                if(this.state.condition[i].code != code){
+                    tmp.push(this.state.condition[i])
+                }
+            }
+            this.state.condition = tmp
+            this.reloadCondition()
+        }
+        //--------查询条件--------结束----------
     };
 
     var list;
 
-    layui.use(['table'], function(table){
+    layui.use(['table','layer','element'], function(table,layer,element){
 
-        list = new ListOption(table)
+        list = new ListOption(table,element)
 
         var columnsEventOption = {
             delete: function (e) {
@@ -336,6 +467,87 @@
             btnsEventOption['add'](this)
         })
 
+
+        $('[data-select-id="addToolbar"]').click(function () {
+            layer.open({
+                type:2,
+                title:'按钮设置',
+                area:['800px','500px'],
+                content: ['createToolBar.html','no'],
+                shadeClose: false,
+                success: function (el,index) {
+                    showToolBarWindow($(el).find('iframe')[0],index)
+                }
+            })
+            return false
+        })
+        $('[data-select-id="addCondition"]').click(function () {
+            layer.open({
+                type:2,
+                title:'按钮设置',
+                area:['800px','500px'],
+                content: ['createCondition.html','no'],
+                shadeClose: false,
+                success: function (el,index) {
+                    showConditionWindow($(el).find('iframe')[0],index)
+                }
+            })
+            return false
+        })
+
+        $('[lay-filter="toolbar"]').on('click','[data-select-id="toolbar-show"]',function () {
+            var code = $(this).attr('data-code')
+            layer.open({
+                type:2,
+                title:'按钮设置',
+                area:['800px','500px'],
+                content: ['createToolBar.html','no'],
+                shadeClose: false,
+                success: function (el,index) {
+                    showToolBarWindow($(el).find('iframe')[0],index,list.getToolBar(code))
+                }
+            })
+            return false
+        })
+
+        function showConditionWindow(frame,index,data) {
+            var contentWindow = frame.contentWindow
+            contentWindow.ready = function (option) {
+                option.loadCondition(data)
+            }
+            contentWindow.close = function () {
+                layer.close(index)
+            }
+            contentWindow.submit = function (data) {
+                if(data.code){
+                    list.deleteCondition(data.code)
+                }
+                list.addCondition(data)
+            }
+            contentWindow.delete = function (code) {
+                list.deleteCondition(code)
+            }
+        }
+
+        function showToolBarWindow(frame,index,data) {
+            var contentWindow = frame.contentWindow
+            contentWindow.ready = function (option) {
+                option.loadToolBar(data)
+            }
+            contentWindow.close = function () {
+                layer.close(index)
+            }
+            contentWindow.submit = function (data) {
+                if(data.code){
+                    list.deleteToolBar(data.code)
+                }
+                list.addToolBar(data)
+            }
+            contentWindow.delete = function (code) {
+                list.deleteToolBar(code)
+            }
+        }
+
         window.setTimeout(function () {
             if(window.ready){
                 window.ready(list)
@@ -399,4 +611,6 @@
          */
 
     });
+
+
 </script>
