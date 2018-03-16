@@ -116,9 +116,12 @@
                 config.field = $('[name="field"]').val()
                 config.size = this.state.condition.size
                 config.termType = this.state.condition.termType
-                config.editor.type = this.state.condition.editor.type
-                config.editor.format = this.state.condition.editor.format
+                config.editor.type = this.state.condition.editor.type ? this.state.condition.editor.type : 'textbox'
+                if(config.editor.type && config.editor.type == 'date'){
+                    config.editor.format = this.state.condition.editor.format ? this.state.condition.editor.format : 'yyyy-MM-dd'
+                }
                 config.code = this.state.condition.code
+
                 return config
             }
             

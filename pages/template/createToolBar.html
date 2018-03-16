@@ -96,7 +96,9 @@
                     this.state.btn = toolbar
                     if(this.state.btn.type == 'menuButton'){
                         for (var i = 0; i< this.state.btn.children.length;i++){
-                            this.state.btn.children[i].code = new Date().getTime()
+                            if(!this.state.btn.children[i].code){
+                                this.state.btn.children[i].code = new Date().getTime()
+                            }
                         }
                     }
                     this.render()
@@ -105,7 +107,7 @@
 
             this.getToolBar = function () {
                 var config = {}
-                config.type = this.state.btn.type
+                config.type = this.state.btn.type ? this.state.btn.type : 'button'
                 config.autz = $('[name="autz"]').val()
                 config.iconCls = $('[name="iconCls"]').val()
                 config.text = $('[name="text"]').val()
@@ -115,6 +117,8 @@
                 }else if(config.type == 'button'){
                     config.onclick = editor.getValue()
                 }
+
+                config.code = this.state.btn.code
 
                 return config
             }

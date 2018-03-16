@@ -123,27 +123,37 @@
 
         this.loadConfig = function (config) {
             if(config){
-                if(config.columns) {
-                    if(config.columns){
-                        this.state.columns = config.columns
+                if(config.table) {
+                    if(config.table.columns){
+                        this.state.columns = config.table.columns
                         for(var i = 0; i < this.state.columns.length; i++){
-                            this.state.columns[i].code = new Date().getTime()
+                            if(!this.state.columns[i].code){
+                                this.state.columns[i].code = new Date().getTime() + '' + Math.random()
+                            }
                         }
                         this.reloadColumnsTable()
                     }
 
-                    if(config.btns){
-                        this.state.btns = config.btns
+                    if(config.table.actions){
+                        this.state.btns = config.table.actions
                         for(var i = 0; i < this.state.btns.length; i++){
-                            this.state.btns[i].code = new Date().getTime()
+                            if(!this.state.btns[i].code){
+                                this.state.btns[i].code = new Date().getTime() + '' + Math.random()
+                            }
                         }
                         this.reloadBtnsTable()
+                    }
+
+                    if(config.table.url){
+                        $('[name="url"]').val(config.table.url)
                     }
 
                     if(config.toolbar){
                         this.state.toolbar = config.toolbar
                         for(var i = 0; i < this.state.toolbar.length; i++){
-                            this.state.toolbar[i].code = new Date().getTime()
+                            if(!this.state.toolbar[i].code){
+                                this.state.toolbar[i].code = new Date().getTime() + '' + Math.random()
+                            }
                         }
                         this.reloadToolBar()
                     }
@@ -151,7 +161,9 @@
                     if(config.condition){
                         this.state.condition = config.condition
                         for(var i = 0; i < this.state.condition.length; i++){
-                            this.state.condition[i].code = new Date().getTime()
+                            if(!this.state.condition[i].code){
+                                this.state.condition[i].code = new Date().getTime() + '' + Math.random()
+                            }
                         }
                         this.reloadCondition()
                     }
@@ -162,11 +174,14 @@
 
         this.getConfig = function () {
             return {
-                script: this.getConfig(),
+                script: $('[name="script"]').val(),
                 table: {
                     actions: this.getBtns(),
                     columns: this.getColumns(),
-                }
+                    url: $('[name="url"]').val()
+                },
+                toolbar: this.state.toolbar,
+                condition: this.state.condition
             }
         }
 
@@ -183,7 +198,7 @@
                     return false
                 }
             }
-            line.code = new Date().getTime()
+            line.code = new Date().getTime() + '' + Math.random()
             this.state.columns.push(line)
             this.reloadColumnsTable()
         }
@@ -240,7 +255,7 @@
                     return false
                 }
             }
-            line.code = new Date().getTime()
+            line.code = new Date().getTime() + '' + Math.random()
             this.state.btns.push(line)
             this.reloadBtnsTable()
         }
@@ -318,9 +333,20 @@
             this.state.toolbar = tmp
             this.reloadToolBar()
         }
+
+        this.updateToolBar = function (line) {
+            for(var i = 0; i < this.state.toolbar.length; i++){
+                if(this.state.toolbar[i].code == line.code){
+                    this.state.toolbar[i] = line
+                    this.reloadToolBar()
+                    return
+                }
+            }
+            this.addToolBar(data)
+        }
         
         this.addToolBar = function (line) {
-            line.code = new Date().getTime()
+            line.code = new Date().getTime() + '' + Math.random()
             this.state.toolbar.push(line)
             this.reloadToolBar()
         }
@@ -339,19 +365,19 @@
         this.reloadCondition = function () {
             var panel = $('[lay-filter="condition"]').empty()
             for(var i = 0; i < this.state.condition.length; i++){
-                console.info(this.state.condition[i])
-                var html = ' <div class="layui-form-item layui-col-md'+this.state.condition[i].size+' layui-col-xs'+this.state.condition[i].size+'">\n' +
+                var html = '<div data-select-id="condition-show" data-code="'+this.state.condition[i].code+'" class="layui-col-md'+this.state.condition[i].size+' layui-col-xs'+this.state.condition[i].size+'"><div class="layui-form-item brick">\n' +
                     '    <label class="layui-form-label">'+this.state.condition[i].text+'</label>\n' +
                     '    <div class="layui-input-block">\n' +
                     '      <input type="text" required  lay-verify="required" placeholder="'+this.state.condition[i].editor.emptyText+'" autocomplete="off" class="layui-input">\n' +
                     '    </div>\n' +
-                    '  </div>'
+                    '  </div></div> '
                 panel.append(html)
             }
         }
 
         this.addCondition = function (line) {
-            line.code = new Date().getTime()
+            line.code = new Date().getTime() + '' + Math.random()
+            line.id = line.code
             this.state.condition.push(line)
             this.reloadCondition()
         }
@@ -365,6 +391,25 @@
             }
             this.state.condition = tmp
             this.reloadCondition()
+        }
+
+        this.updateCondition = function (line) {
+            for(var i = 0; i < this.state.condition.length; i++){
+                if(this.state.condition[i].code == line.code){
+                    this.state.condition[i] = line
+                    this.reloadCondition()
+                    return
+                }
+            }
+            this.addCondition(line)
+        }
+
+        this.getCondition = function (code) {
+            for(var i = 0; i < this.state.condition.length; i++){
+                if(this.state.condition[i].code = code){
+                    return this.state.condition[i]
+                }
+            }
         }
         //--------查询条件--------结束----------
     };
@@ -510,6 +555,21 @@
             return false
         })
 
+        $('[lay-filter="condition"]').on('click','[data-select-id="condition-show"]',function () {
+            var code = $(this).attr('data-code')
+            layer.open({
+                type:2,
+                title:'按钮设置',
+                area:['800px','500px'],
+                content: ['createCondition.html','no'],
+                shadeClose: false,
+                success: function (el,index) {
+                    showConditionWindow($(el).find('iframe')[0],index,list.getCondition(code))
+                }
+            })
+            return false
+        })
+
         function showConditionWindow(frame,index,data) {
             var contentWindow = frame.contentWindow
             contentWindow.ready = function (option) {
@@ -520,9 +580,10 @@
             }
             contentWindow.submit = function (data) {
                 if(data.code){
-                    list.deleteCondition(data.code)
+                    list.updateCondition(data)
+                }else{
+                    list.addCondition(data)
                 }
-                list.addCondition(data)
             }
             contentWindow.delete = function (code) {
                 list.deleteCondition(code)
@@ -539,9 +600,10 @@
             }
             contentWindow.submit = function (data) {
                 if(data.code){
-                    list.deleteToolBar(data.code)
+                    list.updateToolBar(data)
+                }else{
+                    list.addToolBar(data)
                 }
-                list.addToolBar(data)
             }
             contentWindow.delete = function (code) {
                 list.deleteToolBar(code)

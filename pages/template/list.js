@@ -124,15 +124,36 @@ define(["request", "hsForm", "hsTable"], function (request, hsForm, hsTable) {
                 listWindow = frame[0].contentWindow
                 listWindow.ready = function (obj) {
                     listOption = obj
-                    listOption.loadConfig({
-                        columns:[{field:'name',displayField:'name',header:'name',width:'10%',condition:'1111',renderer:'121212'}]
+                    listOption.loadConfig(JSON.parse(data.config))
+                    $(document).on('click','[data-select-id="look"]',function () {
+                        layer.open({
+                            type: 2,
+                            area:['800px','600px'],
+                            content: ['modules/template/generator.html','no'],
+                            success: function (index, layero) {
+                                var contentWindow = $('iframe[src="modules/template/generator.html"]')[0].contentWindow
+                                contentWindow.ready = function (generator) {
+                                    generator.build(listOption.getConfig())
+                                }
+                            }
+                        });
                     })
                 }
             }
             
             function listSubmit(formData,formEl,submitCallBack) {
-                console.info(listOption.getColumns())
-                console.info(listOption.getBtns())
+                formData.config = JSON.stringify(listOption.getConfig())
+                request.patch(window.API_BASE_PATH + 'template',formData,function (r) {
+                    if(r.status && r.status == 200){
+                        if(submitCallBack){
+                            submitCallBack(r)
+                        }
+                        layui.layer.closeAll()
+                        table.reload()
+                    }else{
+                        layui.layer.msg(r.message)
+                    }
+                })
             }
             
             hsForm.openForm({
